@@ -1,41 +1,616 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Beats | Syntax-to-Synth</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Beats — Syntax-to-Synth Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <style>
+    /* ── TOKENS ── */
+    :root {
+      --bg:         #0a0c10;
+      --bg-panel:   #0f1318;
+      --bg-input:   #080b0f;
+      --border:     #1e2a38;
+      --border-glow:#00ffe7;
+      --accent:     #00ffe7;
+      --accent2:    #ff3cac;
+      --accent3:    #ffe600;
+      --text:       #c8d8e8;
+      --text-dim:   #4a6070;
+      --synth-bar:  #00ffe7;
+      --font-mono:  'Share Tech Mono', monospace;
+      --font-head:  'Orbitron', sans-serif;
+      --radius:     6px;
+      --gutter:     16px;
+    }
 
-    <link rel="stylesheet" href="css/style.css">
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-panel);
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    .logo {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      text-shadow: 0 0 12px var(--accent);
+      white-space: nowrap;
+    }
+    .logo span { color: var(--accent2); text-shadow: 0 0 12px var(--accent2); }
+
+    .tagline {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .status-pill {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+    .status-pill.ready  { border-color: var(--accent);  color: var(--accent);  }
+    .status-pill.active { border-color: var(--accent3); color: var(--accent3); animation: blink 1s step-start infinite; }
+    @keyframes blink { 50% { opacity: 0.4; } }
+
+    /* ── SPLIT PANE WRAPPER ── */
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      flex: 1;
+      overflow: hidden;
+      gap: 0;
+    }
+
+    /* ── PANEL SHARED ── */
+    .panel {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+    .panel:last-child { border-right: none; }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+    .panel-header .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
+    .panel-header .dot.pink  { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+
+    /* ── LEFT: CODE PANE ── */
+    #code-pane { background: var(--bg-input); }
+
+    #code-editor {
+      flex: 1;
+      width: 100%;
+      resize: none;
+      background: transparent;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      line-height: 1.75;
+      padding: 16px 18px;
+      border: none;
+      outline: none;
+      caret-color: var(--accent);
+      overflow-y: auto;
+    }
+    #code-editor::placeholder { color: var(--text-dim); }
+    #code-editor:focus { box-shadow: inset 3px 0 0 var(--accent); }
+
+    .code-toolbar {
+      display: flex;
+      gap: 8px;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-panel);
+      flex-shrink: 0;
+    }
+
+    .btn {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      padding: 6px 16px;
+      border-radius: var(--radius);
+      border: 1px solid;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-transform: uppercase;
+    }
+    .btn-run {
+      border-color: var(--accent);
+      color: var(--bg);
+      background: var(--accent);
+    }
+    .btn-run:hover { box-shadow: 0 0 14px var(--accent); }
+    .btn-stop {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      background: transparent;
+    }
+    .btn-stop:hover { background: var(--accent2); color: var(--bg); box-shadow: 0 0 14px var(--accent2); }
+    .btn-clear {
+      border-color: var(--border);
+      color: var(--text-dim);
+      background: transparent;
+      margin-left: auto;
+    }
+    .btn-clear:hover { border-color: var(--text-dim); color: var(--text); }
+
+    /* ── RIGHT: SYNTH UI PANE ── */
+    #synth-pane { background: var(--bg-panel); }
+
+    .synth-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    /* Oscilloscope / visualizer */
+    .viz-section label {
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 8px;
+    }
+    #waveform-canvas {
+      width: 100%;
+      height: 90px;
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-input);
+    }
+
+    /* Readout grid */
+    .readout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .readout-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+    }
+    .readout-card .rc-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .readout-card .rc-value {
+      font-family: var(--font-head);
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+    .readout-card .rc-value.pink { color: var(--accent2); }
+    .readout-card .rc-value.yellow { color: var(--accent3); }
+
+    /* Beat grid */
+    .beat-section label {
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .beat-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 5px;
+    }
+    .beat-cell {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      transition: background 0.08s, box-shadow 0.08s;
+    }
+    .beat-cell.on {
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      border-color: var(--accent);
+    }
+    .beat-cell.active {
+      background: var(--accent3);
+      box-shadow: 0 0 10px var(--accent3);
+      border-color: var(--accent3);
+    }
+
+    /* Console / log */
+    .console-section {
+      margin-top: auto;
+    }
+    .console-section label {
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 6px;
+    }
+    #console-log {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-size: 0.75rem;
+      line-height: 1.7;
+      height: 90px;
+      overflow-y: auto;
+      color: var(--text-dim);
+    }
+    #console-log .log-ok   { color: var(--accent); }
+    #console-log .log-err  { color: var(--accent2); }
+    #console-log .log-info { color: var(--accent3); }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 6px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-panel);
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      letter-spacing: 0.15em;
+      display: flex;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* ── RESPONSIVE: stack on narrow ── */
+    @media (max-width: 680px) {
+      .workspace { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+      .panel { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <div class="editor-panel">
-            <h2>Input Logic</h2>
-            <pre><code class="language-javascript" id="code-input" contenteditable="true">
-// Paste your code here to generate beats
-function triggerBeat() {
-    console.log("Kick drum");
-}                
-            </code></pre>
-        </div>
+<!-- ── HEADER ── -->
+<header>
+  <div>
+    <div class="logo">CODE<span>BEATS</span></div>
+    <div class="tagline">Syntax-to-Synth Lab</div>
+  </div>
+  <span id="status" class="status-pill ready">● READY</span>
+</header>
 
-        <div class="control-panel">
-            <h2>Transport</h2>
-            <button id="play-btn">Play</button>
-            <button id="stop-btn">Stop</button>
+<!-- ── WORKSPACE ── -->
+<div class="workspace">
 
-            <label for="bpm-slider">BPM: <span id="bpm-display">120</span></label>
-            <input type="range" id="bpm-slider" min="60" max="200" value="120">
-        </div>
+  <!-- LEFT: CODE EDITOR -->
+  <div class="panel" id="code-pane">
+    <div class="panel-header">
+      <span class="dot"></span>
+      Code Input
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <textarea id="code-editor" spellcheck="false" placeholder="// Type synth commands here
+// Example commands (Phase 2 will parse these):
+//
+//   play(C4, 0.5)      → play a note
+//   bpm(120)           → set tempo
+//   synth(sine)        → set waveform
+//   beat([1,0,1,0])    → set beat pattern
+//
+// Press RUN to execute ↓"></textarea>
 
-    <script src="app.js"></script>
+    <div class="code-toolbar">
+      <button class="btn btn-run"  id="btn-run">▶ Run</button>
+      <button class="btn btn-stop" id="btn-stop">■ Stop</button>
+      <button class="btn btn-clear" id="btn-clear">Clear</button>
+    </div>
+  </div>
 
+  <!-- RIGHT: SYNTH UI -->
+  <div class="panel" id="synth-pane">
+    <div class="panel-header">
+      <span class="dot pink"></span>
+      Synth Output
+    </div>
+
+    <div class="synth-body">
+
+      <!-- Oscilloscope -->
+      <div class="viz-section">
+        <label>Oscilloscope</label>
+        <canvas id="waveform-canvas"></canvas>
+      </div>
+
+      <!-- Readouts -->
+      <div class="readout-grid">
+        <div class="readout-card">
+          <div class="rc-label">Waveform</div>
+          <div class="rc-value" id="rd-wave">SINE</div>
+        </div>
+        <div class="readout-card">
+          <div class="rc-label">BPM</div>
+          <div class="rc-value yellow" id="rd-bpm">120</div>
+        </div>
+        <div class="readout-card">
+          <div class="rc-label">Last Note</div>
+          <div class="rc-value pink" id="rd-note">—</div>
+        </div>
+        <div class="readout-card">
+          <div class="rc-label">Duration</div>
+          <div class="rc-value" id="rd-dur">—</div>
+        </div>
+      </div>
+
+      <!-- Beat Grid -->
+      <div class="beat-section">
+        <label>Beat Sequencer (8 steps)</label>
+        <div class="beat-grid" id="beat-grid"></div>
+      </div>
+
+      <!-- Console -->
+      <div class="console-section">
+        <label>Console</label>
+        <div id="console-log"><span class="log-info">// System initialized. Tone.js loaded.</span><br></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <span>CODE BEATS — Phase 1 Scaffold</span>
+  <span>Tone.js v14 · GitHub Pages</span>
+</footer>
+
+
+<script>
+/* ════════════════════════════════════════════
+   CODE BEATS — Phase 1 JS
+   Scope: layout wiring, Tone.js hello-world,
+   oscilloscope, basic play() stub
+   ════════════════════════════════════════════ */
+
+// ── State ──────────────────────────────────
+const state = {
+  synth: null,
+  analyser: null,
+  waveType: 'sine',
+  bpm: 120,
+  isPlaying: false,
+  beatPattern: [1,0,0,0, 1,0,1,0],
+  rafId: null,
+};
+
+// ── DOM refs ───────────────────────────────
+const editor    = document.getElementById('code-editor');
+const btnRun    = document.getElementById('btn-run');
+const btnStop   = document.getElementById('btn-stop');
+const btnClear  = document.getElementById('btn-clear');
+const statusEl  = document.getElementById('status');
+const rdWave    = document.getElementById('rd-wave');
+const rdBpm     = document.getElementById('rd-bpm');
+const rdNote    = document.getElementById('rd-note');
+const rdDur     = document.getElementById('rd-dur');
+const consoleEl = document.getElementById('console-log');
+const canvas    = document.getElementById('waveform-canvas');
+const ctx       = canvas.getContext('2d');
+const beatGrid  = document.getElementById('beat-grid');
+
+// ── Console helper ─────────────────────────
+function log(msg, type = 'info') {
+  const span = document.createElement('span');
+  span.className = `log-${type}`;
+  span.textContent = msg;
+  consoleEl.appendChild(span);
+  consoleEl.appendChild(document.createElement('br'));
+  consoleEl.scrollTop = consoleEl.scrollHeight;
+}
+
+// ── Status helper ──────────────────────────
+function setStatus(label, cls) {
+  statusEl.textContent = label;
+  statusEl.className = `status-pill ${cls}`;
+}
+
+// ── Build Beat Grid ────────────────────────
+function buildBeatGrid(pattern) {
+  beatGrid.innerHTML = '';
+  pattern.forEach((on, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'beat-cell' + (on ? ' on' : '');
+    cell.dataset.index = i;
+    beatGrid.appendChild(cell);
+  });
+}
+buildBeatGrid(state.beatPattern);
+
+// ── Init Tone.js ───────────────────────────
+async function initAudio() {
+  await Tone.start();
+  if (state.synth) return; // already initialized
+
+  state.analyser = new Tone.Analyser('waveform', 256);
+  state.synth = new Tone.Synth({
+    oscillator: { type: state.waveType },
+    envelope: { attack: 0.02, decay: 0.1, sustain: 0.5, release: 0.8 },
+  }).connect(state.analyser).toDestination();
+
+  log('// Audio context started. Synth ready.', 'ok');
+  setStatus('● READY', 'ready');
+  startOscilloscope();
+}
+
+// ── Oscilloscope ───────────────────────────
+function resizeCanvas() {
+  canvas.width  = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function startOscilloscope() {
+  function draw() {
+    state.rafId = requestAnimationFrame(draw);
+    if (!state.analyser) return;
+
+    const values = state.analyser.getValue();
+    const W = canvas.width, H = canvas.height;
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.beginPath();
+    ctx.strokeStyle = state.isPlaying
+      ? getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()
+      : '#1e2a38';
+    ctx.lineWidth = 1.5;
+
+    values.forEach((v, i) => {
+      const x = (i / values.length) * W;
+      const y = ((v + 1) / 2) * H;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  }
+  draw();
+}
+
+// ── Simple play() stub ─────────────────────
+//    Phase 2 will replace this with a full parser.
+//    For now: parse the first play(...) command found.
+function executeCode(code) {
+  const lines = code.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('//'));
+
+  if (lines.length === 0) {
+    log('// No commands found.', 'err');
+    return;
+  }
+
+  lines.forEach(line => {
+    // play(note, duration)
+    const playMatch = line.match(/^play\(\s*([A-Ga-g][#b]?\d?)\s*,\s*([\d.]+)\s*\)/);
+    if (playMatch) {
+      const note = playMatch[1].toUpperCase();
+      const dur  = parseFloat(playMatch[2]);
+      playNote(note, dur);
+      return;
+    }
+
+    // bpm(value)
+    const bpmMatch = line.match(/^bpm\(\s*(\d+)\s*\)/);
+    if (bpmMatch) {
+      state.bpm = parseInt(bpmMatch[1]);
+      Tone.getTransport().bpm.value = state.bpm;
+      rdBpm.textContent = state.bpm;
+      log(`// BPM set to ${state.bpm}`, 'ok');
+      return;
+    }
+
+    // synth(waveform)
+    const synthMatch = line.match(/^synth\(\s*(sine|square|triangle|sawtooth)\s*\)/);
+    if (synthMatch) {
+      state.waveType = synthMatch[1];
+      if (state.synth) state.synth.oscillator.type = state.waveType;
+      rdWave.textContent = state.waveType.toUpperCase();
+      log(`// Waveform set to ${state.waveType}`, 'ok');
+      return;
+    }
+
+    log(`// Unknown command: ${line}`, 'err');
+  });
+}
+
+function playNote(note, duration) {
+  if (!state.synth) { log('// Audio not started.', 'err'); return; }
+  state.isPlaying = true;
+  setStatus('● PLAYING', 'active');
+  rdNote.textContent = note;
+  rdDur.textContent  = `${duration}s`;
+  log(`// play(${note}, ${duration})`, 'ok');
+
+  state.synth.triggerAttackRelease(note, duration);
+  setTimeout(() => {
+    state.isPlaying = false;
+    setStatus('● READY', 'ready');
+  }, duration * 1000 + 100);
+}
+
+// ── Button handlers ────────────────────────
+btnRun.addEventListener('click', async () => {
+  await initAudio();
+  const code = editor.value;
+  if (!code.trim()) { log('// Editor is empty.', 'err'); return; }
+  log(`// Running ${code.split('\n').filter(l=>l.trim()&&!l.trim().startsWith('//')).length} command(s)...`, 'info');
+  executeCode(code);
+});
+
+btnStop.addEventListener('click', () => {
+  if (state.synth) state.synth.triggerRelease();
+  Tone.getTransport().stop();
+  state.isPlaying = false;
+  setStatus('● READY', 'ready');
+  log('// Stopped.', 'info');
+});
+
+btnClear.addEventListener('click', () => {
+  editor.value = '';
+  editor.focus();
+});
+</script>
 </body>
 </html>
