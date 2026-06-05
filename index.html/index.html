@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Digital Portfolio</title>
+    <!-- Importing Fira Code from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Sticky Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="logo">Hub_</div>
+            <nav class="menu-container">
+                <button class="menu-trigger">Explore ▾</button>
+                <div class="dropdown-menu">
+                    <a href="#about">About Me</a>
+                    <a href="#projects">Project Labs</a>
+                    <a href="#contact">Connect</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="about" class="hero-section">
+        <div class="hero-left">
+            <h1>Building secure, scalable systems from the ground up.</h1>
+            <p class="subtitle">Specializing in Enterprise IT Infrastructure and Blue-Team Security Analytics.</p>
+            <div class="hero-cta">
+                <a href="#projects" class="btn-primary">View Lab Deployments</a>
+                <a href="#contact" class="btn-secondary">Get In Touch</a>
+            </div>
+        </div>
+        <div class="hero-right">
+            <div class="image-frame">
+                <img src="images/profile.jpg" alt="Profile Photo" class="profile-img">
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Grid Section -->
+    <section id="projects" class="projects-section">
+        <h2 class="section-title">// Featured Engineering Labs</h2>
+        <div class="projects-grid">
+            
+            <!-- Project 1: IT Focused -->
+            <div class="project-card">
+                <div class="card-image-wrapper">
+                    <img src="projects/ad-lab.png" alt="Active Directory Lab Diagram" class="card-img">
+                </div>
+                <div class="card-content">
+                    <h3>Enterprise Active Directory Lab</h3>
+                    <p>Automated deployment of a Windows Server ecosystem featuring automated user onboarding, DNS architectures, and rigid Group Policy management.</p>
+                    <div class="tags">
+                        <span>Windows Server</span>
+                        <span>PowerShell</span>
+                        <span>GPO</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project 2: Security Focused -->
+            <div class="project-card">
+                <div class="card-image-wrapper">
+                    <img src="projects/siem-lab.png" alt="SIEM Monitoring Dashboard" class="card-img">
+                </div>
+                <div class="card-content">
+                    <h3>SIEM & SOC Detection Pipeline</h3>
+                    <p>Live security monitoring pipeline ingesting malicious traffic from a public cloud honeypot, mapping live attacks via syslog analysis.</p>
+                    <div class="tags">
+                        <span>SIEM</span>
+                        <span>Wazuh/ELK</span>
+                        <span>Threat Hunting</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Simple Footer / Contact -->
+    <footer id="contact" class="footer">
+        <p>© 2026 | Built with Fira Code & GitHub Pages</p>
+    </footer>
+
+</body>
+</html>
