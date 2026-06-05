@@ -19,6 +19,9 @@
       --accent3:   #ffe600;
       --text:      #c8d8e8;
       --text-dim:  #4a6070;
+      --kick-color:  #ff3cac;
+      --snare-color: #ffe600;
+      --hihat-color: #00ffe7;
       --font-mono: 'Share Tech Mono', monospace;
       --font-head: 'Orbitron', sans-serif;
       --radius:    6px;
@@ -126,7 +129,6 @@
 
     /* ── LEFT: CODE PANE ── */
     #code-pane { background: var(--bg-input); }
-
     #code-editor {
       flex: 1;
       width: 100%;
@@ -165,16 +167,15 @@
       transition: all 0.15s;
       text-transform: uppercase;
     }
-    .btn-run   { border-color: var(--accent);  color: var(--bg);      background: var(--accent); }
+    .btn-run   { border-color: var(--accent);  color: var(--bg);       background: var(--accent); }
     .btn-run:hover   { box-shadow: 0 0 14px var(--accent); }
-    .btn-stop  { border-color: var(--accent2); color: var(--accent2); background: transparent; }
+    .btn-stop  { border-color: var(--accent2); color: var(--accent2);  background: transparent; }
     .btn-stop:hover  { background: var(--accent2); color: var(--bg); box-shadow: 0 0 14px var(--accent2); }
-    .btn-loop  { border-color: var(--accent3); color: var(--accent3); background: transparent; }
-    .btn-loop.active { background: var(--accent3); color: var(--bg); box-shadow: 0 0 14px var(--accent3); }
+    .btn-loop  { border-color: var(--accent3); color: var(--accent3);  background: transparent; }
+    .btn-loop.active { background: var(--accent3); color: var(--bg);   box-shadow: 0 0 14px var(--accent3); }
     .btn-clear { border-color: var(--border);  color: var(--text-dim); background: transparent; margin-left: auto; }
     .btn-clear:hover { border-color: var(--text-dim); color: var(--text); }
 
-    /* presets */
     .preset-bar {
       display: flex;
       gap: 6px;
@@ -213,15 +214,13 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      padding: 16px;
+      gap: 14px;
+      padding: 14px;
       overflow-y: auto;
     }
 
-    /* oscilloscope */
-    .viz-section label,
-    .beat-section label,
-    .console-section label {
+    /* section labels */
+    .section-label {
       font-size: 0.62rem;
       letter-spacing: 0.18em;
       color: var(--text-dim);
@@ -229,9 +228,11 @@
       display: block;
       margin-bottom: 6px;
     }
+
+    /* oscilloscope */
     #waveform-canvas {
       width: 100%;
-      height: 80px;
+      height: 70px;
       display: block;
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -259,35 +260,80 @@
     }
     .rc-value {
       font-family: var(--font-head);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: var(--accent);
     }
     .rc-value.pink   { color: var(--accent2); }
     .rc-value.yellow { color: var(--accent3); }
     .rc-value.green  { color: #39ff14; }
 
-    /* beat grid */
-    .beat-grid {
+    /* ── DRUM SEQUENCER ── */
+    .drum-sequencer {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .drum-row {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      align-items: center;
+      gap: 8px;
+    }
+    .drum-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-align: right;
+      padding-right: 4px;
+    }
+    .drum-label.kick  { color: var(--kick-color); }
+    .drum-label.snare { color: var(--snare-color); }
+    .drum-label.hihat { color: var(--hihat-color); }
+
+    .drum-grid {
       display: grid;
       grid-template-columns: repeat(8, 1fr);
-      gap: 5px;
+      gap: 4px;
     }
-    .beat-cell {
+    .drum-cell {
       aspect-ratio: 1;
       border-radius: 3px;
       border: 1px solid var(--border);
       background: var(--bg-input);
       transition: background 0.08s, box-shadow 0.08s;
+      cursor: pointer;
     }
-    .beat-cell.on {
-      background: var(--accent);
-      box-shadow: 0 0 8px var(--accent);
-      border-color: var(--accent);
+
+    /* per-row colours when on */
+    .drum-row.kick-row  .drum-cell.on { background: var(--kick-color);  box-shadow: 0 0 8px var(--kick-color);  border-color: var(--kick-color); }
+    .drum-row.snare-row .drum-cell.on { background: var(--snare-color); box-shadow: 0 0 8px var(--snare-color); border-color: var(--snare-color); }
+    .drum-row.hihat-row .drum-cell.on { background: var(--hihat-color); box-shadow: 0 0 8px var(--hihat-color); border-color: var(--hihat-color); }
+
+    /* active step flash (yellow for all rows) */
+    .drum-cell.active {
+      outline: 2px solid var(--accent3);
+      outline-offset: 1px;
     }
-    .beat-cell.active {
-      background: var(--accent3) !important;
-      box-shadow: 0 0 12px var(--accent3) !important;
-      border-color: var(--accent3) !important;
+    .drum-cell.on.active {
+      filter: brightness(1.6);
+    }
+
+    /* step counter bar */
+    .step-bar {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 8px;
+    }
+    .step-bar-inner {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 4px;
+    }
+    .step-num {
+      font-size: 0.55rem;
+      color: var(--text-dim);
+      text-align: center;
+      letter-spacing: 0;
     }
 
     /* console */
@@ -299,7 +345,7 @@
       padding: 8px 12px;
       font-size: 0.73rem;
       line-height: 1.7;
-      height: 100px;
+      height: 88px;
       overflow-y: auto;
       color: var(--text-dim);
     }
@@ -335,7 +381,7 @@
 <header>
   <div>
     <div class="logo">CODE<span>BEATS</span></div>
-    <div class="tagline">Syntax-to-Synth Lab · Phase 2</div>
+    <div class="tagline">Syntax-to-Synth Lab · Phase 3</div>
   </div>
   <div class="header-right">
     <a href="../index.html" class="back-link">← Hub</a>
@@ -354,14 +400,17 @@
 
     <textarea id="code-editor" spellcheck="false" placeholder="// Available commands:
 //
-//   play(C4, 0.5)              → play note, duration in seconds
-//   bpm(120)                   → set tempo (40–240)
-//   synth(sine)                → waveform: sine | square | triangle | sawtooth
-//   beat([1,0,1,0,1,0,1,0])   → 8-step pattern (1=on, 0=off)
-//   volume(0.8)                → master volume (0.0–1.0)
+//   play(C4, 0.5)              → melody note + duration (s)
+//   bpm(120)                   → tempo: 40–240
+//   synth(sine)                → sine | square | triangle | sawtooth
+//   volume(0.8)                → master volume: 0.0–1.0
 //   loop(true)                 → loop beat: true | false
 //
-// Lines starting with // are comments and are ignored.
+//   // Drum commands (8-step arrays):
+//   kick([1,0,0,1,1,0,0,1])   → kick drum pattern
+//   snare([0,0,1,0,0,0,1,0])  → snare pattern
+//   hihat([1,1,1,1,1,1,1,1])  → hi-hat pattern
+//
 // Press RUN to execute ↓"></textarea>
 
     <div class="code-toolbar">
@@ -374,9 +423,10 @@
     <div class="preset-bar">
       <span>Presets:</span>
       <button class="btn-preset" data-preset="basic">Basic Note</button>
-      <button class="btn-preset" data-preset="beat">Beat Pattern</button>
+      <button class="btn-preset" data-preset="drums">Full Drums</button>
       <button class="btn-preset" data-preset="melody">Melody</button>
-      <button class="btn-preset" data-preset="bass">Bass Line</button>
+      <button class="btn-preset" data-preset="groove">Groove</button>
+      <button class="btn-preset" data-preset="hiphop">Hip-Hop</button>
     </div>
   </div>
 
@@ -390,12 +440,12 @@
     <div class="synth-body">
 
       <!-- Oscilloscope -->
-      <div class="viz-section">
-        <label>Oscilloscope</label>
+      <div>
+        <span class="section-label">Oscilloscope</span>
         <canvas id="waveform-canvas"></canvas>
       </div>
 
-      <!-- Readouts — now 6 cards in 3 columns -->
+      <!-- Readouts -->
       <div class="readout-grid">
         <div class="readout-card">
           <div class="rc-label">Waveform</div>
@@ -407,7 +457,7 @@
         </div>
         <div class="readout-card">
           <div class="rc-label">Volume</div>
-          <div class="rc-value green" id="rd-vol">0.8</div>
+          <div class="rc-value green" id="rd-vol">0.80</div>
         </div>
         <div class="readout-card">
           <div class="rc-label">Last Note</div>
@@ -423,17 +473,37 @@
         </div>
       </div>
 
-      <!-- Beat Grid -->
-      <div class="beat-section">
-        <label>Beat Sequencer (8 steps)</label>
-        <div class="beat-grid" id="beat-grid"></div>
+      <!-- Drum Sequencer -->
+      <div>
+        <span class="section-label">Drum Sequencer</span>
+
+        <!-- Step numbers -->
+        <div class="step-bar">
+          <div></div>
+          <div class="step-bar-inner" id="step-numbers"></div>
+        </div>
+
+        <div class="drum-sequencer" id="drum-sequencer">
+          <div class="drum-row kick-row"  data-instrument="kick">
+            <div class="drum-label kick">Kick</div>
+            <div class="drum-grid" id="grid-kick"></div>
+          </div>
+          <div class="drum-row snare-row" data-instrument="snare">
+            <div class="drum-label snare">Snare</div>
+            <div class="drum-grid" id="grid-snare"></div>
+          </div>
+          <div class="drum-row hihat-row" data-instrument="hihat">
+            <div class="drum-label hihat">Hi-Hat</div>
+            <div class="drum-grid" id="grid-hihat"></div>
+          </div>
+        </div>
       </div>
 
       <!-- Console -->
       <div class="console-section">
-        <label>Console</label>
+        <span class="section-label">Console</span>
         <div id="console-log">
-          <span class="log-info">// Code Beats Phase 2 — Parser ready.</span><br>
+          <span class="log-info">// Code Beats Phase 3 — Drum sequencer ready.</span><br>
         </div>
       </div>
 
@@ -442,16 +512,18 @@
 </div>
 
 <footer>
-  <span>CODE BEATS — Phase 2 · Command Parser</span>
+  <span>CODE BEATS — Phase 3 · Multi-Row Drum Sequencer</span>
   <span>Tone.js v14 · GitHub Pages</span>
 </footer>
 
 
 <script>
 /* ════════════════════════════════════════════
-   CODE BEATS — Phase 2
-   Full command parser, beat sequencer,
-   volume control, loop toggle, presets
+   CODE BEATS — Phase 3
+   Multi-row drum sequencer: kick, snare, hi-hat
+   Each row has its own synthesized sound,
+   8-step grid, and colour-coded UI.
+   All Phase 2 commands retained.
    ════════════════════════════════════════════ */
 
 // ── Presets ────────────────────────────────
@@ -462,48 +534,74 @@ bpm(120)
 volume(0.8)
 play(C4, 0.5)`,
 
-  beat: `// Beat Pattern
-synth(square)
-bpm(130)
-volume(0.7)
-beat([1,0,0,1,1,0,1,0])
+  drums: `// Full Drum Kit
+bpm(120)
+volume(0.8)
+kick([1,0,0,0,1,0,0,0])
+snare([0,0,1,0,0,0,1,0])
+hihat([1,1,1,1,1,1,1,1])
 loop(true)`,
 
-  melody: `// Simple Melody
+  melody: `// Melody + Hi-Hat
 synth(triangle)
 bpm(100)
 volume(0.75)
+hihat([1,0,1,0,1,0,1,0])
+loop(true)
 play(C4, 0.3)
 play(E4, 0.3)
 play(G4, 0.3)
 play(C5, 0.6)`,
 
-  bass: `// Bass Line
+  groove: `// Groove Pattern
+synth(sine)
+bpm(95)
+volume(0.7)
+kick([1,0,0,1,0,0,1,0])
+snare([0,0,1,0,0,1,0,0])
+hihat([1,0,1,1,0,1,1,0])
+loop(true)`,
+
+  hiphop: `// Hip-Hop Beat
 synth(sawtooth)
-bpm(90)
-volume(0.6)
-beat([1,0,1,0,0,1,0,1])
+bpm(85)
+volume(0.75)
+kick([1,0,0,0,0,0,1,0])
+snare([0,0,0,1,0,0,0,1])
+hihat([1,1,0,1,1,1,0,1])
 loop(true)`
 };
 
-// ── Valid notes & waveforms ────────────────
+// ── Constants ──────────────────────────────
 const VALID_NOTES = /^[A-Ga-g][#b]?\d$/;
 const VALID_WAVES = ['sine', 'square', 'triangle', 'sawtooth'];
+const STEPS       = 8;
 
 // ── State ──────────────────────────────────
 const state = {
-  synth:       null,
+  // audio nodes
+  melodySynth: null,
+  kickSynth:   null,
+  snareSynth:  null,
+  hihatSynth:  null,
   vol:         null,
   analyser:    null,
-  loop:        null,
+  seqLoop:     null,
+
+  // params
   waveType:    'sine',
   bpm:         120,
   volume:      0.8,
   loopEnabled: false,
   isPlaying:   false,
-  beatPattern: [0,0,0,0,0,0,0,0],
-  beatStep:    -1,
-  rafId:       null,
+  currentStep: -1,
+
+  // drum patterns
+  patterns: {
+    kick:  new Array(STEPS).fill(0),
+    snare: new Array(STEPS).fill(0),
+    hihat: new Array(STEPS).fill(0),
+  }
 };
 
 // ── DOM refs ───────────────────────────────
@@ -522,9 +620,8 @@ const rdLoop    = document.getElementById('rd-loop');
 const consoleEl = document.getElementById('console-log');
 const canvas    = document.getElementById('waveform-canvas');
 const ctx2d     = canvas.getContext('2d');
-const beatGrid  = document.getElementById('beat-grid');
 
-// ── Helpers ────────────────────────────────
+// ── Console ────────────────────────────────
 function log(msg, type = 'info') {
   const span = document.createElement('span');
   span.className = `log-${type}`;
@@ -539,39 +636,94 @@ function setStatus(label, cls) {
   statusEl.className = `status-pill ${cls}`;
 }
 
-// ── Beat Grid ──────────────────────────────
-function buildBeatGrid(pattern) {
-  beatGrid.innerHTML = '';
-  pattern.forEach((on, i) => {
+// ── Build step number bar ──────────────────
+function buildStepNumbers() {
+  const bar = document.getElementById('step-numbers');
+  bar.innerHTML = '';
+  for (let i = 1; i <= STEPS; i++) {
+    const d = document.createElement('div');
+    d.className = 'step-num';
+    d.textContent = i;
+    bar.appendChild(d);
+  }
+}
+buildStepNumbers();
+
+// ── Build a drum grid row ──────────────────
+function buildDrumGrid(instrument) {
+  const grid = document.getElementById(`grid-${instrument}`);
+  grid.innerHTML = '';
+  state.patterns[instrument].forEach((on, i) => {
     const cell = document.createElement('div');
-    cell.className = 'beat-cell' + (on ? ' on' : '');
-    cell.dataset.index = i;
-    beatGrid.appendChild(cell);
+    cell.className = 'drum-cell' + (on ? ' on' : '');
+    cell.dataset.step = i;
+    cell.dataset.instrument = instrument;
+
+    // Click to toggle cell manually
+    cell.addEventListener('click', () => {
+      state.patterns[instrument][i] ^= 1;
+      cell.classList.toggle('on', state.patterns[instrument][i] === 1);
+    });
+
+    grid.appendChild(cell);
   });
 }
-buildBeatGrid(state.beatPattern);
 
+function buildAllGrids() {
+  buildDrumGrid('kick');
+  buildDrumGrid('snare');
+  buildDrumGrid('hihat');
+}
+buildAllGrids();
+
+// ── Highlight current playback step ────────
 function highlightStep(step) {
-  const cells = beatGrid.querySelectorAll('.beat-cell');
-  cells.forEach((c, i) => {
-    c.classList.remove('active');
-    if (i === step) c.classList.add('active');
+  ['kick', 'snare', 'hihat'].forEach(inst => {
+    const cells = document.querySelectorAll(`#grid-${inst} .drum-cell`);
+    cells.forEach((c, i) => {
+      c.classList.toggle('active', i === step);
+    });
   });
 }
 
 // ── Audio init ─────────────────────────────
 async function initAudio() {
   await Tone.start();
-  if (state.synth) return;
+  if (state.melodySynth) return;
 
   state.analyser = new Tone.Analyser('waveform', 256);
   state.vol      = new Tone.Volume(Tone.gainToDb(state.volume));
-  state.synth    = new Tone.Synth({
+
+  // Melody synth
+  state.melodySynth = new Tone.Synth({
     oscillator: { type: state.waveType },
     envelope:   { attack: 0.02, decay: 0.1, sustain: 0.5, release: 0.5 },
   }).chain(state.vol, state.analyser, Tone.getDestination());
 
-  log('// Audio context started. Synth ready.', 'ok');
+  // Kick: low sine with pitch drop
+  state.kickSynth = new Tone.MembraneSynth({
+    pitchDecay:  0.05,
+    octaves:     8,
+    envelope:    { attack: 0.001, decay: 0.3, sustain: 0, release: 0.1 },
+  }).chain(state.vol, Tone.getDestination());
+
+  // Snare: noise burst
+  state.snareSynth = new Tone.NoiseSynth({
+    noise:    { type: 'white' },
+    envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.05 },
+  }).chain(state.vol, Tone.getDestination());
+
+  // Hi-hat: metallic noise, very short
+  state.hihatSynth = new Tone.MetalSynth({
+    frequency:  400,
+    envelope:   { attack: 0.001, decay: 0.05, release: 0.01 },
+    harmonicity: 5.1,
+    modulationIndex: 32,
+    resonance:  4000,
+    octaves:    1.5,
+  }).chain(state.vol, Tone.getDestination());
+
+  log('// Audio context started. Drum kit ready.', 'ok');
   setStatus('● READY', 'ready');
   startOscilloscope();
 }
@@ -586,7 +738,7 @@ window.addEventListener('resize', resizeCanvas);
 
 function startOscilloscope() {
   function draw() {
-    state.rafId = requestAnimationFrame(draw);
+    requestAnimationFrame(draw);
     if (!state.analyser) return;
     const values = state.analyser.getValue();
     const W = canvas.width, H = canvas.height;
@@ -604,47 +756,65 @@ function startOscilloscope() {
   draw();
 }
 
-// ── Beat Sequencer ─────────────────────────
-function startBeatLoop() {
-  stopBeatLoop();
-  const pattern = state.beatPattern;
-  let step = 0;
+// ── Drum Sequencer ─────────────────────────
+function startDrumLoop() {
+  stopDrumLoop();
   Tone.getTransport().bpm.value = state.bpm;
+  let step = 0;
 
-  state.loop = new Tone.Sequence((time) => {
-    highlightStep(step);
-    if (pattern[step]) {
-      state.synth.triggerAttackRelease('C2', '8n', time);
+  state.seqLoop = new Tone.Sequence((time) => {
+    state.currentStep = step;
+
+    // Schedule UI highlight slightly after audio time
+    Tone.getDraw().schedule(() => {
+      highlightStep(step);
+    }, time);
+
+    const k = state.patterns.kick[step];
+    const s = state.patterns.snare[step];
+    const h = state.patterns.hihat[step];
+
+    if (k) {
+      state.kickSynth.triggerAttackRelease('C1', '8n', time);
       state.isPlaying = true;
-      setTimeout(() => { state.isPlaying = false; }, 150);
     }
-    step = (step + 1) % pattern.length;
-  }, [...Array(pattern.length).keys()], '8n');
+    if (s) {
+      state.snareSynth.triggerAttackRelease('8n', time);
+      state.isPlaying = true;
+    }
+    if (h) {
+      state.hihatSynth.triggerAttackRelease('32n', time);
+      state.isPlaying = true;
+    }
 
-  state.loop.start(0);
+    step = (step + 1) % STEPS;
+  }, [...Array(STEPS).keys()], '8n');
+
+  state.seqLoop.start(0);
   Tone.getTransport().start();
   setStatus('↺ LOOPING', 'loop');
-  log('// Beat loop started.', 'ok');
+  log('// Drum loop started.', 'ok');
 }
 
-function stopBeatLoop() {
-  if (state.loop) {
-    state.loop.stop();
-    state.loop.dispose();
-    state.loop = null;
+function stopDrumLoop() {
+  if (state.seqLoop) {
+    state.seqLoop.stop();
+    state.seqLoop.dispose();
+    state.seqLoop = null;
   }
   Tone.getTransport().stop();
   highlightStep(-1);
+  state.isPlaying   = false;
+  state.currentStep = -1;
 }
 
 // ══════════════════════════════════════════
-//   PHASE 2 — COMMAND PARSER
+//   COMMAND PARSER (Phase 2 + Phase 3)
 // ══════════════════════════════════════════
 function executeCode(code) {
   const rawLines = code.split('\n');
   const commands = [];
 
-  // Strip comments and blanks, preserve line numbers for error reporting
   rawLines.forEach((raw, idx) => {
     const trimmed = raw.trim();
     if (trimmed && !trimmed.startsWith('//')) {
@@ -659,8 +829,8 @@ function executeCode(code) {
 
   log(`// Executing ${commands.length} command(s)...`, 'info');
 
-  // Collect melody notes for sequenced playback
   const melodyNotes = [];
+  let drumPatternSet = false;
 
   commands.forEach(({ text: line, lineNum }) => {
 
@@ -705,27 +875,9 @@ function executeCode(code) {
         return;
       }
       state.waveType = wave;
-      if (state.synth) state.synth.oscillator.type = wave;
+      if (state.melodySynth) state.melodySynth.oscillator.type = wave;
       rdWave.textContent = wave.toUpperCase();
       log(`// synth → ${wave}`, 'ok');
-      return;
-    }
-
-    // ── beat([...]) ───────────────────────
-    const beatMatch = line.match(/^beat\(\s*\[([0-9,\s]+)\]\s*\)$/i);
-    if (beatMatch) {
-      const raw = beatMatch[1].split(',').map(n => parseInt(n.trim()));
-      if (raw.length !== 8) {
-        log(`// Line ${lineNum} error: beat pattern must have exactly 8 values. Got ${raw.length}.`, 'err');
-        return;
-      }
-      if (raw.some(v => v !== 0 && v !== 1)) {
-        log(`// Line ${lineNum} error: beat values must be 0 or 1.`, 'err');
-        return;
-      }
-      state.beatPattern = raw;
-      buildBeatGrid(raw);
-      log(`// beat → [${raw.join(',')}]`, 'ok');
       return;
     }
 
@@ -755,24 +907,78 @@ function executeCode(code) {
       return;
     }
 
-    // ── Unknown command ───────────────────
+    // ── kick([...]) ───────────────────────
+    const kickMatch = line.match(/^kick\(\s*\[([0-9,\s]+)\]\s*\)$/i);
+    if (kickMatch) {
+      const parsed = parseDrumPattern(kickMatch[1], 'kick', lineNum);
+      if (parsed) {
+        state.patterns.kick = parsed;
+        buildDrumGrid('kick');
+        drumPatternSet = true;
+        log(`// kick → [${parsed.join(',')}]`, 'ok');
+      }
+      return;
+    }
+
+    // ── snare([...]) ──────────────────────
+    const snareMatch = line.match(/^snare\(\s*\[([0-9,\s]+)\]\s*\)$/i);
+    if (snareMatch) {
+      const parsed = parseDrumPattern(snareMatch[1], 'snare', lineNum);
+      if (parsed) {
+        state.patterns.snare = parsed;
+        buildDrumGrid('snare');
+        drumPatternSet = true;
+        log(`// snare → [${parsed.join(',')}]`, 'ok');
+      }
+      return;
+    }
+
+    // ── hihat([...]) ──────────────────────
+    const hihatMatch = line.match(/^hihat\(\s*\[([0-9,\s]+)\]\s*\)$/i);
+    if (hihatMatch) {
+      const parsed = parseDrumPattern(hihatMatch[1], 'hihat', lineNum);
+      if (parsed) {
+        state.patterns.hihat = parsed;
+        buildDrumGrid('hihat');
+        drumPatternSet = true;
+        log(`// hihat → [${parsed.join(',')}]`, 'ok');
+      }
+      return;
+    }
+
+    // ── Unknown ───────────────────────────
     log(`// Line ${lineNum} error: unknown command → "${line}"`, 'err');
   });
 
-  // ── Play melody notes in sequence ────────
+  // Play melody notes sequentially
   if (melodyNotes.length > 0) {
     playMelody(melodyNotes);
   }
 
-  // ── Start beat loop if pattern set and loop enabled ──
-  if (state.loopEnabled && state.beatPattern.some(v => v === 1)) {
-    startBeatLoop();
+  // Start drum loop if loop enabled and any pattern has notes
+  const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1));
+  if (state.loopEnabled && hasPattern) {
+    startDrumLoop();
   }
 }
 
-// ── Melody playback (sequential) ──────────
+// ── Drum pattern validator ─────────────────
+function parseDrumPattern(raw, name, lineNum) {
+  const arr = raw.split(',').map(n => parseInt(n.trim()));
+  if (arr.length !== STEPS) {
+    log(`// Line ${lineNum} error: ${name} pattern must have exactly ${STEPS} values. Got ${arr.length}.`, 'err');
+    return null;
+  }
+  if (arr.some(v => v !== 0 && v !== 1)) {
+    log(`// Line ${lineNum} error: ${name} values must be 0 or 1.`, 'err');
+    return null;
+  }
+  return arr;
+}
+
+// ── Sequential melody playback ─────────────
 function playMelody(notes) {
-  if (!state.synth) return;
+  if (!state.melodySynth) return;
   let delay = 0;
   notes.forEach(({ note, dur }) => {
     setTimeout(() => {
@@ -781,7 +987,7 @@ function playMelody(notes) {
       rdNote.textContent = note;
       rdDur.textContent  = `${dur}s`;
       log(`// play(${note}, ${dur})`, 'ok');
-      state.synth.triggerAttackRelease(note, dur);
+      state.melodySynth.triggerAttackRelease(note, dur);
       setTimeout(() => {
         state.isPlaying = false;
         if (!state.loopEnabled) setStatus('● READY', 'ready');
@@ -794,7 +1000,7 @@ function playMelody(notes) {
 // ── Button: RUN ────────────────────────────
 btnRun.addEventListener('click', async () => {
   await initAudio();
-  stopBeatLoop();
+  stopDrumLoop();
   const code = editor.value;
   if (!code.trim()) { log('// Editor is empty.', 'err'); return; }
   executeCode(code);
@@ -802,9 +1008,8 @@ btnRun.addEventListener('click', async () => {
 
 // ── Button: STOP ───────────────────────────
 btnStop.addEventListener('click', () => {
-  stopBeatLoop();
-  if (state.synth) state.synth.triggerRelease();
-  state.isPlaying   = false;
+  stopDrumLoop();
+  if (state.melodySynth) state.melodySynth.triggerRelease();
   state.loopEnabled = false;
   rdLoop.textContent = 'OFF';
   btnLoop.classList.remove('active');
@@ -818,10 +1023,12 @@ btnLoop.addEventListener('click', async () => {
   state.loopEnabled = !state.loopEnabled;
   btnLoop.classList.toggle('active', state.loopEnabled);
   rdLoop.textContent = state.loopEnabled ? 'ON' : 'OFF';
-  if (state.loopEnabled && state.beatPattern.some(v => v === 1)) {
-    startBeatLoop();
+
+  const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1));
+  if (state.loopEnabled && hasPattern) {
+    startDrumLoop();
   } else {
-    stopBeatLoop();
+    stopDrumLoop();
     setStatus('● READY', 'ready');
     log('// Loop disabled.', 'info');
   }
@@ -833,7 +1040,7 @@ btnClear.addEventListener('click', () => {
   editor.focus();
 });
 
-// ── Preset buttons ─────────────────────────
+// ── Presets ────────────────────────────────
 document.querySelectorAll('.btn-preset').forEach(btn => {
   btn.addEventListener('click', () => {
     const key = btn.dataset.preset;
