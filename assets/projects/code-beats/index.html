@@ -9,23 +9,19 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
   <style>
-    /* ── TOKENS ── */
     :root {
-      --bg:         #0a0c10;
-      --bg-panel:   #0f1318;
-      --bg-input:   #080b0f;
-      --border:     #1e2a38;
-      --border-glow:#00ffe7;
-      --accent:     #00ffe7;
-      --accent2:    #ff3cac;
-      --accent3:    #ffe600;
-      --text:       #c8d8e8;
-      --text-dim:   #4a6070;
-      --synth-bar:  #00ffe7;
-      --font-mono:  'Share Tech Mono', monospace;
-      --font-head:  'Orbitron', sans-serif;
-      --radius:     6px;
-      --gutter:     16px;
+      --bg:        #0a0c10;
+      --bg-panel:  #0f1318;
+      --bg-input:  #080b0f;
+      --border:    #1e2a38;
+      --accent:    #00ffe7;
+      --accent2:   #ff3cac;
+      --accent3:   #ffe600;
+      --text:      #c8d8e8;
+      --text-dim:  #4a6070;
+      --font-mono: 'Share Tech Mono', monospace;
+      --font-head: 'Orbitron', sans-serif;
+      --radius:    6px;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -51,7 +47,6 @@
       flex-shrink: 0;
       gap: 12px;
     }
-
     .logo {
       font-family: var(--font-head);
       font-size: 1rem;
@@ -62,14 +57,24 @@
       white-space: nowrap;
     }
     .logo span { color: var(--accent2); text-shadow: 0 0 12px var(--accent2); }
-
     .tagline {
       font-size: 0.65rem;
       color: var(--text-dim);
       letter-spacing: 0.2em;
       text-transform: uppercase;
     }
-
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .back-link {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 20px;
+      transition: all 0.15s;
+    }
+    .back-link:hover { color: var(--accent); border-color: var(--accent); }
     .status-pill {
       font-size: 0.65rem;
       letter-spacing: 0.15em;
@@ -79,20 +84,18 @@
       color: var(--text-dim);
       white-space: nowrap;
     }
-    .status-pill.ready  { border-color: var(--accent);  color: var(--accent);  }
+    .status-pill.ready  { border-color: var(--accent);  color: var(--accent); }
     .status-pill.active { border-color: var(--accent3); color: var(--accent3); animation: blink 1s step-start infinite; }
+    .status-pill.loop   { border-color: var(--accent2); color: var(--accent2); animation: blink 1s step-start infinite; }
     @keyframes blink { 50% { opacity: 0.4; } }
 
-    /* ── SPLIT PANE WRAPPER ── */
+    /* ── WORKSPACE ── */
     .workspace {
       display: grid;
       grid-template-columns: 1fr 1fr;
       flex: 1;
       overflow: hidden;
-      gap: 0;
     }
-
-    /* ── PANEL SHARED ── */
     .panel {
       display: flex;
       flex-direction: column;
@@ -100,7 +103,6 @@
       border-right: 1px solid var(--border);
     }
     .panel:last-child { border-right: none; }
-
     .panel-header {
       display: flex;
       align-items: center;
@@ -120,7 +122,7 @@
       background: var(--accent);
       box-shadow: 0 0 6px var(--accent);
     }
-    .panel-header .dot.pink  { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+    .panel-header .dot.pink { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
 
     /* ── LEFT: CODE PANE ── */
     #code-pane { background: var(--bg-input); }
@@ -150,8 +152,8 @@
       border-top: 1px solid var(--border);
       background: var(--bg-panel);
       flex-shrink: 0;
+      flex-wrap: wrap;
     }
-
     .btn {
       font-family: var(--font-mono);
       font-size: 0.72rem;
@@ -163,92 +165,108 @@
       transition: all 0.15s;
       text-transform: uppercase;
     }
-    .btn-run {
-      border-color: var(--accent);
-      color: var(--bg);
-      background: var(--accent);
-    }
-    .btn-run:hover { box-shadow: 0 0 14px var(--accent); }
-    .btn-stop {
-      border-color: var(--accent2);
-      color: var(--accent2);
-      background: transparent;
-    }
-    .btn-stop:hover { background: var(--accent2); color: var(--bg); box-shadow: 0 0 14px var(--accent2); }
-    .btn-clear {
-      border-color: var(--border);
-      color: var(--text-dim);
-      background: transparent;
-      margin-left: auto;
-    }
+    .btn-run   { border-color: var(--accent);  color: var(--bg);      background: var(--accent); }
+    .btn-run:hover   { box-shadow: 0 0 14px var(--accent); }
+    .btn-stop  { border-color: var(--accent2); color: var(--accent2); background: transparent; }
+    .btn-stop:hover  { background: var(--accent2); color: var(--bg); box-shadow: 0 0 14px var(--accent2); }
+    .btn-loop  { border-color: var(--accent3); color: var(--accent3); background: transparent; }
+    .btn-loop.active { background: var(--accent3); color: var(--bg); box-shadow: 0 0 14px var(--accent3); }
+    .btn-clear { border-color: var(--border);  color: var(--text-dim); background: transparent; margin-left: auto; }
     .btn-clear:hover { border-color: var(--text-dim); color: var(--text); }
 
-    /* ── RIGHT: SYNTH UI PANE ── */
-    #synth-pane { background: var(--bg-panel); }
+    /* presets */
+    .preset-bar {
+      display: flex;
+      gap: 6px;
+      padding: 6px 14px 8px;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+    .preset-bar span {
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      white-space: nowrap;
+      padding-top: 5px;
+    }
+    .btn-preset {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      background: transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .btn-preset:hover { border-color: var(--accent); color: var(--accent); }
 
+    /* ── RIGHT: SYNTH PANE ── */
+    #synth-pane { background: var(--bg-panel); }
     .synth-body {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      padding: 20px;
+      gap: 16px;
+      padding: 16px;
       overflow-y: auto;
     }
 
-    /* Oscilloscope / visualizer */
-    .viz-section label {
+    /* oscilloscope */
+    .viz-section label,
+    .beat-section label,
+    .console-section label {
       font-size: 0.62rem;
       letter-spacing: 0.18em;
       color: var(--text-dim);
       text-transform: uppercase;
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     #waveform-canvas {
       width: 100%;
-      height: 90px;
+      height: 80px;
       display: block;
       border: 1px solid var(--border);
       border-radius: var(--radius);
       background: var(--bg-input);
     }
 
-    /* Readout grid */
+    /* readouts */
     .readout-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
     }
     .readout-card {
       background: var(--bg-input);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 10px 14px;
+      padding: 8px 12px;
     }
-    .readout-card .rc-label {
-      font-size: 0.58rem;
+    .rc-label {
+      font-size: 0.55rem;
       letter-spacing: 0.18em;
       color: var(--text-dim);
       text-transform: uppercase;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
-    .readout-card .rc-value {
+    .rc-value {
       font-family: var(--font-head);
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       color: var(--accent);
     }
-    .readout-card .rc-value.pink { color: var(--accent2); }
-    .readout-card .rc-value.yellow { color: var(--accent3); }
+    .rc-value.pink   { color: var(--accent2); }
+    .rc-value.yellow { color: var(--accent3); }
+    .rc-value.green  { color: #39ff14; }
 
-    /* Beat grid */
-    .beat-section label {
-      font-size: 0.62rem;
-      letter-spacing: 0.18em;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      display: block;
-      margin-bottom: 8px;
-    }
+    /* beat grid */
     .beat-grid {
       display: grid;
       grid-template-columns: repeat(8, 1fr);
@@ -267,31 +285,21 @@
       border-color: var(--accent);
     }
     .beat-cell.active {
-      background: var(--accent3);
-      box-shadow: 0 0 10px var(--accent3);
-      border-color: var(--accent3);
+      background: var(--accent3) !important;
+      box-shadow: 0 0 12px var(--accent3) !important;
+      border-color: var(--accent3) !important;
     }
 
-    /* Console / log */
-    .console-section {
-      margin-top: auto;
-    }
-    .console-section label {
-      font-size: 0.62rem;
-      letter-spacing: 0.18em;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      display: block;
-      margin-bottom: 6px;
-    }
+    /* console */
+    .console-section { margin-top: auto; }
     #console-log {
       background: var(--bg-input);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 10px 12px;
-      font-size: 0.75rem;
+      padding: 8px 12px;
+      font-size: 0.73rem;
       line-height: 1.7;
-      height: 90px;
+      height: 100px;
       overflow-y: auto;
       color: var(--text-dim);
     }
@@ -312,12 +320,10 @@
       flex-shrink: 0;
     }
 
-    /* ── SCROLLBAR ── */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-    /* ── RESPONSIVE: stack on narrow ── */
     @media (max-width: 680px) {
       .workspace { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
       .panel { border-right: none; border-bottom: 1px solid var(--border); }
@@ -326,16 +332,17 @@
 </head>
 <body>
 
-<!-- ── HEADER ── -->
 <header>
   <div>
     <div class="logo">CODE<span>BEATS</span></div>
-    <div class="tagline">Syntax-to-Synth Lab</div>
+    <div class="tagline">Syntax-to-Synth Lab · Phase 2</div>
   </div>
-  <span id="status" class="status-pill ready">● READY</span>
+  <div class="header-right">
+    <a href="../index.html" class="back-link">← Hub</a>
+    <span id="status" class="status-pill ready">● READY</span>
+  </div>
 </header>
 
-<!-- ── WORKSPACE ── -->
 <div class="workspace">
 
   <!-- LEFT: CODE EDITOR -->
@@ -345,20 +352,31 @@
       Code Input
     </div>
 
-    <textarea id="code-editor" spellcheck="false" placeholder="// Type synth commands here
-// Example commands (Phase 2 will parse these):
+    <textarea id="code-editor" spellcheck="false" placeholder="// Available commands:
 //
-//   play(C4, 0.5)      → play a note
-//   bpm(120)           → set tempo
-//   synth(sine)        → set waveform
-//   beat([1,0,1,0])    → set beat pattern
+//   play(C4, 0.5)              → play note, duration in seconds
+//   bpm(120)                   → set tempo (40–240)
+//   synth(sine)                → waveform: sine | square | triangle | sawtooth
+//   beat([1,0,1,0,1,0,1,0])   → 8-step pattern (1=on, 0=off)
+//   volume(0.8)                → master volume (0.0–1.0)
+//   loop(true)                 → loop beat: true | false
 //
+// Lines starting with // are comments and are ignored.
 // Press RUN to execute ↓"></textarea>
 
     <div class="code-toolbar">
       <button class="btn btn-run"  id="btn-run">▶ Run</button>
       <button class="btn btn-stop" id="btn-stop">■ Stop</button>
+      <button class="btn btn-loop" id="btn-loop">↺ Loop</button>
       <button class="btn btn-clear" id="btn-clear">Clear</button>
+    </div>
+
+    <div class="preset-bar">
+      <span>Presets:</span>
+      <button class="btn-preset" data-preset="basic">Basic Note</button>
+      <button class="btn-preset" data-preset="beat">Beat Pattern</button>
+      <button class="btn-preset" data-preset="melody">Melody</button>
+      <button class="btn-preset" data-preset="bass">Bass Line</button>
     </div>
   </div>
 
@@ -377,7 +395,7 @@
         <canvas id="waveform-canvas"></canvas>
       </div>
 
-      <!-- Readouts -->
+      <!-- Readouts — now 6 cards in 3 columns -->
       <div class="readout-grid">
         <div class="readout-card">
           <div class="rc-label">Waveform</div>
@@ -388,12 +406,20 @@
           <div class="rc-value yellow" id="rd-bpm">120</div>
         </div>
         <div class="readout-card">
+          <div class="rc-label">Volume</div>
+          <div class="rc-value green" id="rd-vol">0.8</div>
+        </div>
+        <div class="readout-card">
           <div class="rc-label">Last Note</div>
           <div class="rc-value pink" id="rd-note">—</div>
         </div>
         <div class="readout-card">
           <div class="rc-label">Duration</div>
           <div class="rc-value" id="rd-dur">—</div>
+        </div>
+        <div class="readout-card">
+          <div class="rc-label">Loop</div>
+          <div class="rc-value" id="rd-loop">OFF</div>
         </div>
       </div>
 
@@ -406,54 +432,99 @@
       <!-- Console -->
       <div class="console-section">
         <label>Console</label>
-        <div id="console-log"><span class="log-info">// System initialized. Tone.js loaded.</span><br></div>
+        <div id="console-log">
+          <span class="log-info">// Code Beats Phase 2 — Parser ready.</span><br>
+        </div>
       </div>
 
     </div>
   </div>
 </div>
 
-<!-- ── FOOTER ── -->
 <footer>
-  <span>CODE BEATS — Phase 1 Scaffold</span>
+  <span>CODE BEATS — Phase 2 · Command Parser</span>
   <span>Tone.js v14 · GitHub Pages</span>
 </footer>
 
 
 <script>
 /* ════════════════════════════════════════════
-   CODE BEATS — Phase 1 JS
-   Scope: layout wiring, Tone.js hello-world,
-   oscilloscope, basic play() stub
+   CODE BEATS — Phase 2
+   Full command parser, beat sequencer,
+   volume control, loop toggle, presets
    ════════════════════════════════════════════ */
+
+// ── Presets ────────────────────────────────
+const PRESETS = {
+  basic: `// Basic Note
+synth(sine)
+bpm(120)
+volume(0.8)
+play(C4, 0.5)`,
+
+  beat: `// Beat Pattern
+synth(square)
+bpm(130)
+volume(0.7)
+beat([1,0,0,1,1,0,1,0])
+loop(true)`,
+
+  melody: `// Simple Melody
+synth(triangle)
+bpm(100)
+volume(0.75)
+play(C4, 0.3)
+play(E4, 0.3)
+play(G4, 0.3)
+play(C5, 0.6)`,
+
+  bass: `// Bass Line
+synth(sawtooth)
+bpm(90)
+volume(0.6)
+beat([1,0,1,0,0,1,0,1])
+loop(true)`
+};
+
+// ── Valid notes & waveforms ────────────────
+const VALID_NOTES = /^[A-Ga-g][#b]?\d$/;
+const VALID_WAVES = ['sine', 'square', 'triangle', 'sawtooth'];
 
 // ── State ──────────────────────────────────
 const state = {
-  synth: null,
-  analyser: null,
-  waveType: 'sine',
-  bpm: 120,
-  isPlaying: false,
-  beatPattern: [1,0,0,0, 1,0,1,0],
-  rafId: null,
+  synth:       null,
+  vol:         null,
+  analyser:    null,
+  loop:        null,
+  waveType:    'sine',
+  bpm:         120,
+  volume:      0.8,
+  loopEnabled: false,
+  isPlaying:   false,
+  beatPattern: [0,0,0,0,0,0,0,0],
+  beatStep:    -1,
+  rafId:       null,
 };
 
 // ── DOM refs ───────────────────────────────
 const editor    = document.getElementById('code-editor');
 const btnRun    = document.getElementById('btn-run');
 const btnStop   = document.getElementById('btn-stop');
+const btnLoop   = document.getElementById('btn-loop');
 const btnClear  = document.getElementById('btn-clear');
 const statusEl  = document.getElementById('status');
 const rdWave    = document.getElementById('rd-wave');
 const rdBpm     = document.getElementById('rd-bpm');
+const rdVol     = document.getElementById('rd-vol');
 const rdNote    = document.getElementById('rd-note');
 const rdDur     = document.getElementById('rd-dur');
+const rdLoop    = document.getElementById('rd-loop');
 const consoleEl = document.getElementById('console-log');
 const canvas    = document.getElementById('waveform-canvas');
-const ctx       = canvas.getContext('2d');
+const ctx2d     = canvas.getContext('2d');
 const beatGrid  = document.getElementById('beat-grid');
 
-// ── Console helper ─────────────────────────
+// ── Helpers ────────────────────────────────
 function log(msg, type = 'info') {
   const span = document.createElement('span');
   span.className = `log-${type}`;
@@ -463,13 +534,12 @@ function log(msg, type = 'info') {
   consoleEl.scrollTop = consoleEl.scrollHeight;
 }
 
-// ── Status helper ──────────────────────────
 function setStatus(label, cls) {
   statusEl.textContent = label;
   statusEl.className = `status-pill ${cls}`;
 }
 
-// ── Build Beat Grid ────────────────────────
+// ── Beat Grid ──────────────────────────────
 function buildBeatGrid(pattern) {
   beatGrid.innerHTML = '';
   pattern.forEach((on, i) => {
@@ -481,16 +551,25 @@ function buildBeatGrid(pattern) {
 }
 buildBeatGrid(state.beatPattern);
 
-// ── Init Tone.js ───────────────────────────
+function highlightStep(step) {
+  const cells = beatGrid.querySelectorAll('.beat-cell');
+  cells.forEach((c, i) => {
+    c.classList.remove('active');
+    if (i === step) c.classList.add('active');
+  });
+}
+
+// ── Audio init ─────────────────────────────
 async function initAudio() {
   await Tone.start();
-  if (state.synth) return; // already initialized
+  if (state.synth) return;
 
   state.analyser = new Tone.Analyser('waveform', 256);
-  state.synth = new Tone.Synth({
+  state.vol      = new Tone.Volume(Tone.gainToDb(state.volume));
+  state.synth    = new Tone.Synth({
     oscillator: { type: state.waveType },
-    envelope: { attack: 0.02, decay: 0.1, sustain: 0.5, release: 0.8 },
-  }).connect(state.analyser).toDestination();
+    envelope:   { attack: 0.02, decay: 0.1, sustain: 0.5, release: 0.5 },
+  }).chain(state.vol, state.analyser, Tone.getDestination());
 
   log('// Audio context started. Synth ready.', 'ok');
   setStatus('● READY', 'ready');
@@ -509,107 +588,261 @@ function startOscilloscope() {
   function draw() {
     state.rafId = requestAnimationFrame(draw);
     if (!state.analyser) return;
-
     const values = state.analyser.getValue();
     const W = canvas.width, H = canvas.height;
-
-    ctx.clearRect(0, 0, W, H);
-    ctx.beginPath();
-    ctx.strokeStyle = state.isPlaying
-      ? getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()
-      : '#1e2a38';
-    ctx.lineWidth = 1.5;
-
+    ctx2d.clearRect(0, 0, W, H);
+    ctx2d.beginPath();
+    ctx2d.strokeStyle = state.isPlaying ? '#00ffe7' : '#1e2a38';
+    ctx2d.lineWidth = 1.5;
     values.forEach((v, i) => {
       const x = (i / values.length) * W;
       const y = ((v + 1) / 2) * H;
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      i === 0 ? ctx2d.moveTo(x, y) : ctx2d.lineTo(x, y);
     });
-    ctx.stroke();
+    ctx2d.stroke();
   }
   draw();
 }
 
-// ── Simple play() stub ─────────────────────
-//    Phase 2 will replace this with a full parser.
-//    For now: parse the first play(...) command found.
-function executeCode(code) {
-  const lines = code.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('//'));
+// ── Beat Sequencer ─────────────────────────
+function startBeatLoop() {
+  stopBeatLoop();
+  const pattern = state.beatPattern;
+  let step = 0;
+  Tone.getTransport().bpm.value = state.bpm;
 
-  if (lines.length === 0) {
-    log('// No commands found.', 'err');
+  state.loop = new Tone.Sequence((time) => {
+    highlightStep(step);
+    if (pattern[step]) {
+      state.synth.triggerAttackRelease('C2', '8n', time);
+      state.isPlaying = true;
+      setTimeout(() => { state.isPlaying = false; }, 150);
+    }
+    step = (step + 1) % pattern.length;
+  }, [...Array(pattern.length).keys()], '8n');
+
+  state.loop.start(0);
+  Tone.getTransport().start();
+  setStatus('↺ LOOPING', 'loop');
+  log('// Beat loop started.', 'ok');
+}
+
+function stopBeatLoop() {
+  if (state.loop) {
+    state.loop.stop();
+    state.loop.dispose();
+    state.loop = null;
+  }
+  Tone.getTransport().stop();
+  highlightStep(-1);
+}
+
+// ══════════════════════════════════════════
+//   PHASE 2 — COMMAND PARSER
+// ══════════════════════════════════════════
+function executeCode(code) {
+  const rawLines = code.split('\n');
+  const commands = [];
+
+  // Strip comments and blanks, preserve line numbers for error reporting
+  rawLines.forEach((raw, idx) => {
+    const trimmed = raw.trim();
+    if (trimmed && !trimmed.startsWith('//')) {
+      commands.push({ text: trimmed, lineNum: idx + 1 });
+    }
+  });
+
+  if (commands.length === 0) {
+    log('// No executable commands found.', 'err');
     return;
   }
 
-  lines.forEach(line => {
-    // play(note, duration)
-    const playMatch = line.match(/^play\(\s*([A-Ga-g][#b]?\d?)\s*,\s*([\d.]+)\s*\)/);
+  log(`// Executing ${commands.length} command(s)...`, 'info');
+
+  // Collect melody notes for sequenced playback
+  const melodyNotes = [];
+
+  commands.forEach(({ text: line, lineNum }) => {
+
+    // ── play(note, duration) ──────────────
+    const playMatch = line.match(/^play\(\s*([A-Ga-g][#b]?\d)\s*,\s*([\d.]+)\s*\)$/i);
     if (playMatch) {
       const note = playMatch[1].toUpperCase();
       const dur  = parseFloat(playMatch[2]);
-      playNote(note, dur);
+      if (!VALID_NOTES.test(note)) {
+        log(`// Line ${lineNum} error: invalid note "${note}". Use format C4, D#3, Bb2.`, 'err');
+        return;
+      }
+      if (isNaN(dur) || dur <= 0 || dur > 8) {
+        log(`// Line ${lineNum} error: duration must be 0.1–8 seconds.`, 'err');
+        return;
+      }
+      melodyNotes.push({ note, dur });
       return;
     }
 
-    // bpm(value)
-    const bpmMatch = line.match(/^bpm\(\s*(\d+)\s*\)/);
+    // ── bpm(value) ────────────────────────
+    const bpmMatch = line.match(/^bpm\(\s*(\d+)\s*\)$/i);
     if (bpmMatch) {
-      state.bpm = parseInt(bpmMatch[1]);
-      Tone.getTransport().bpm.value = state.bpm;
-      rdBpm.textContent = state.bpm;
-      log(`// BPM set to ${state.bpm}`, 'ok');
+      const val = parseInt(bpmMatch[1]);
+      if (val < 40 || val > 240) {
+        log(`// Line ${lineNum} error: bpm must be 40–240. Got ${val}.`, 'err');
+        return;
+      }
+      state.bpm = val;
+      Tone.getTransport().bpm.value = val;
+      rdBpm.textContent = val;
+      log(`// bpm → ${val}`, 'ok');
       return;
     }
 
-    // synth(waveform)
-    const synthMatch = line.match(/^synth\(\s*(sine|square|triangle|sawtooth)\s*\)/);
+    // ── synth(waveform) ───────────────────
+    const synthMatch = line.match(/^synth\(\s*(\w+)\s*\)$/i);
     if (synthMatch) {
-      state.waveType = synthMatch[1];
-      if (state.synth) state.synth.oscillator.type = state.waveType;
-      rdWave.textContent = state.waveType.toUpperCase();
-      log(`// Waveform set to ${state.waveType}`, 'ok');
+      const wave = synthMatch[1].toLowerCase();
+      if (!VALID_WAVES.includes(wave)) {
+        log(`// Line ${lineNum} error: unknown waveform "${wave}". Use: ${VALID_WAVES.join(', ')}.`, 'err');
+        return;
+      }
+      state.waveType = wave;
+      if (state.synth) state.synth.oscillator.type = wave;
+      rdWave.textContent = wave.toUpperCase();
+      log(`// synth → ${wave}`, 'ok');
       return;
     }
 
-    log(`// Unknown command: ${line}`, 'err');
+    // ── beat([...]) ───────────────────────
+    const beatMatch = line.match(/^beat\(\s*\[([0-9,\s]+)\]\s*\)$/i);
+    if (beatMatch) {
+      const raw = beatMatch[1].split(',').map(n => parseInt(n.trim()));
+      if (raw.length !== 8) {
+        log(`// Line ${lineNum} error: beat pattern must have exactly 8 values. Got ${raw.length}.`, 'err');
+        return;
+      }
+      if (raw.some(v => v !== 0 && v !== 1)) {
+        log(`// Line ${lineNum} error: beat values must be 0 or 1.`, 'err');
+        return;
+      }
+      state.beatPattern = raw;
+      buildBeatGrid(raw);
+      log(`// beat → [${raw.join(',')}]`, 'ok');
+      return;
+    }
+
+    // ── volume(value) ─────────────────────
+    const volMatch = line.match(/^volume\(\s*([\d.]+)\s*\)$/i);
+    if (volMatch) {
+      const val = parseFloat(volMatch[1]);
+      if (isNaN(val) || val < 0 || val > 1) {
+        log(`// Line ${lineNum} error: volume must be 0.0–1.0. Got ${val}.`, 'err');
+        return;
+      }
+      state.volume = val;
+      if (state.vol) state.vol.volume.value = Tone.gainToDb(val);
+      rdVol.textContent = val.toFixed(2);
+      log(`// volume → ${val.toFixed(2)}`, 'ok');
+      return;
+    }
+
+    // ── loop(true|false) ──────────────────
+    const loopMatch = line.match(/^loop\(\s*(true|false)\s*\)$/i);
+    if (loopMatch) {
+      const val = loopMatch[1].toLowerCase() === 'true';
+      state.loopEnabled = val;
+      rdLoop.textContent = val ? 'ON' : 'OFF';
+      btnLoop.classList.toggle('active', val);
+      log(`// loop → ${val}`, 'ok');
+      return;
+    }
+
+    // ── Unknown command ───────────────────
+    log(`// Line ${lineNum} error: unknown command → "${line}"`, 'err');
+  });
+
+  // ── Play melody notes in sequence ────────
+  if (melodyNotes.length > 0) {
+    playMelody(melodyNotes);
+  }
+
+  // ── Start beat loop if pattern set and loop enabled ──
+  if (state.loopEnabled && state.beatPattern.some(v => v === 1)) {
+    startBeatLoop();
+  }
+}
+
+// ── Melody playback (sequential) ──────────
+function playMelody(notes) {
+  if (!state.synth) return;
+  let delay = 0;
+  notes.forEach(({ note, dur }) => {
+    setTimeout(() => {
+      state.isPlaying = true;
+      setStatus('● PLAYING', 'active');
+      rdNote.textContent = note;
+      rdDur.textContent  = `${dur}s`;
+      log(`// play(${note}, ${dur})`, 'ok');
+      state.synth.triggerAttackRelease(note, dur);
+      setTimeout(() => {
+        state.isPlaying = false;
+        if (!state.loopEnabled) setStatus('● READY', 'ready');
+      }, dur * 1000 + 50);
+    }, delay);
+    delay += dur * 1000 + 60;
   });
 }
 
-function playNote(note, duration) {
-  if (!state.synth) { log('// Audio not started.', 'err'); return; }
-  state.isPlaying = true;
-  setStatus('● PLAYING', 'active');
-  rdNote.textContent = note;
-  rdDur.textContent  = `${duration}s`;
-  log(`// play(${note}, ${duration})`, 'ok');
-
-  state.synth.triggerAttackRelease(note, duration);
-  setTimeout(() => {
-    state.isPlaying = false;
-    setStatus('● READY', 'ready');
-  }, duration * 1000 + 100);
-}
-
-// ── Button handlers ────────────────────────
+// ── Button: RUN ────────────────────────────
 btnRun.addEventListener('click', async () => {
   await initAudio();
+  stopBeatLoop();
   const code = editor.value;
   if (!code.trim()) { log('// Editor is empty.', 'err'); return; }
-  log(`// Running ${code.split('\n').filter(l=>l.trim()&&!l.trim().startsWith('//')).length} command(s)...`, 'info');
   executeCode(code);
 });
 
+// ── Button: STOP ───────────────────────────
 btnStop.addEventListener('click', () => {
+  stopBeatLoop();
   if (state.synth) state.synth.triggerRelease();
-  Tone.getTransport().stop();
-  state.isPlaying = false;
+  state.isPlaying   = false;
+  state.loopEnabled = false;
+  rdLoop.textContent = 'OFF';
+  btnLoop.classList.remove('active');
   setStatus('● READY', 'ready');
   log('// Stopped.', 'info');
 });
 
+// ── Button: LOOP TOGGLE ────────────────────
+btnLoop.addEventListener('click', async () => {
+  await initAudio();
+  state.loopEnabled = !state.loopEnabled;
+  btnLoop.classList.toggle('active', state.loopEnabled);
+  rdLoop.textContent = state.loopEnabled ? 'ON' : 'OFF';
+  if (state.loopEnabled && state.beatPattern.some(v => v === 1)) {
+    startBeatLoop();
+  } else {
+    stopBeatLoop();
+    setStatus('● READY', 'ready');
+    log('// Loop disabled.', 'info');
+  }
+});
+
+// ── Button: CLEAR ──────────────────────────
 btnClear.addEventListener('click', () => {
   editor.value = '';
   editor.focus();
+});
+
+// ── Preset buttons ─────────────────────────
+document.querySelectorAll('.btn-preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.preset;
+    if (PRESETS[key]) {
+      editor.value = PRESETS[key];
+      editor.focus();
+      log(`// Preset loaded: ${key}`, 'info');
+    }
+  });
 });
 </script>
 </body>
