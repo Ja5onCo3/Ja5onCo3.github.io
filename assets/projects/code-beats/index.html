@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Beats | Syntax-to-Synth</title>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="editor-panel">
+            <h2>Input Logic</h2>
+            <pre><code class="language-javascript" id="code-input" contenteditable="true">
+// Paste your code here to generate beats
+function triggerBeat() {
+    console.log("Kick drum");
+}                
+            </code></pre>
+        </div>
+
+        <div class="control-panel">
+            <h2>Transport</h2>
+            <button id="play-btn">Play</button>
+            <button id="stop-btn">Stop</button>
+
+            <label for="bpm-slider">BPM: <span id="bpm-display">120</span></label>
+            <input type="range" id="bpm-slider" min="60" max="200" value="120">
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+    <script src="app.js"></script>
+
+</body>
+</html>
