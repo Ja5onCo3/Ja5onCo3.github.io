@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Digital Portfolio</title>
-    <!-- Importing Fira Code from Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -48,34 +47,37 @@
     <section id="projects" class="projects-section">
         <h2 class="section-title">// Featured Engineering Labs</h2>
         <div class="projects-grid">
-            
-            <!-- Project 1: IT Focused -->
-            <div class="project-card">
-                <div class="card-image-wrapper">
-                    <img src="code-beats/assets/img/code-beats.jpg" alt="Screenshot of a code editor showing CSS style rules for a project named Code Beats, with selectors and property declarations visible; technical, focused tone" class="card-img">
-                </div>
-                <div class="card-content">
-                    <h3>Code Beats Syntax-to-Synth Lab</h3>
-                    <p>Code-based audio generation from programming syntax.</p>
-                    <div class="tags">
-                        <span>JavaScript</span>
-                        <span>Web Audio API</span>
-                        <span>Prism.js</span>
+
+            <!-- Project 1: Code Beats -->
+            <a href="code-beats/index.html" class="project-card-link">
+                <div class="project-card">
+                    <div class="card-image-wrapper card-image-placeholder">
+                        <div class="placeholder-label">CODE BEATS</div>
+                    </div>
+                    <div class="card-content">
+                        <h3>Code Beats Syntax-to-Synth Lab</h3>
+                        <p>Code-based audio synthesis — type commands, generate sound. Split-pane editor with live oscilloscope and beat sequencer.</p>
+                        <div class="tags">
+                            <span>JavaScript</span>
+                            <span>Tone.js</span>
+                            <span>Web Audio</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </a>
 
-            <!-- Project 2: Security Focused -->
-            <div class="project-card">
-                <div class="card-image-wrapper">
-                    <img src="https://placehold.co/600x400?text=SIEM+SOC+Lab" alt="Mock security monitoring dashboard showing charts, alert list, and a world map with highlighted events for a SIEM and SOC detection pipeline; investigative and urgent tone" class="card-img">
+            <!-- Project 2: SIEM / SOC — Coming Soon -->
+            <div class="project-card project-card--disabled">
+                <div class="card-image-wrapper card-image-placeholder card-image-placeholder--dim">
+                    <div class="placeholder-label">SIEM · SOC</div>
+                    <span class="coming-soon-badge">Coming Soon</span>
                 </div>
                 <div class="card-content">
-                    <h3>SIEM & SOC Detection Pipeline</h3>
+                    <h3>SIEM &amp; SOC Detection Pipeline</h3>
                     <p>Live security monitoring pipeline ingesting malicious traffic from a public cloud honeypot, mapping live attacks via syslog analysis.</p>
                     <div class="tags">
                         <span>SIEM</span>
-                        <span>Wazuh/ELK</span>
+                        <span>Wazuh / ELK</span>
                         <span>Threat Hunting</span>
                     </div>
                 </div>
@@ -84,9 +86,9 @@
         </div>
     </section>
 
-    <!-- Simple Footer / Contact -->
+    <!-- Footer / Contact -->
     <footer id="contact" class="footer">
-        <p>© 2026 | Built with Fira Code & GitHub Pages</p>
+        <p>© 2026 | Built with Fira Code &amp; GitHub Pages</p>
     </footer>
 
 </body>

@@ -1,290 +1,65 @@
-/* --- Global Reset & Variables --- */
-:root {
-    --bg-color: #f8fafc;        /* Soft slate white */
-    --card-bg: #ffffff;         /* Pure white for cards */
-    --text-main: #0f172a;       /* Deep slate/navy for text */
-    --text-muted: #475569;      /* Readable grey for body text */
-    --accent: #2563eb;          /* Corporate blue accent */
-    --accent-hover: #1d4ed8;    /* Darker blue for hover states */
-    --border-color: #e2e8f0;    /* Soft clean borders */
-}
+/* ════════════════════════════════════════════
+   ADD THESE RULES TO assets/css/style.css
+   They support the updated project cards in
+   the hub index.html
+   ════════════════════════════════════════════ */
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
-body {
-    font-family: 'Fira Code', monospace;
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    line-height: 1.6;
-}
-
-/* --- Navigation & Dropdown Menu --- */
-.navbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(248, 250, 252, 0.8);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.nav-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 1.2rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: var(--accent);
-}
-
-.menu-container {
-    position: relative;
-    display: inline-block;
-}
-
-.menu-trigger {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    padding: 0.6rem 1.2rem;
-    font-family: inherit;
-    font-size: 0.9rem;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-}
-
-/* Hover Action for Dropdown */
-.menu-container:hover .dropdown-menu {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.menu-container:hover .menu-trigger {
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-    border-radius: 4px;
-    min-width: 160px;
-    margin-top: 0.5rem;
-    overflow: hidden;
-}
-
-.dropdown-menu a {
-    display: block;
-    padding: 0.8rem 1.2rem;
-    color: var(--text-muted);
+/* ── Make the whole card clickable ── */
+.project-card-link {
     text-decoration: none;
-    font-size: 0.85rem;
-    transition: background 0.2s ease;
+    color: inherit;
+    display: block;
 }
-
-.dropdown-menu a:hover {
-    background-color: #f1f5f9;
-    color: var(--accent);
+.project-card-link .project-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-/* --- Hero Layout --- */
-.hero-section {
-    max-width: 1100px;
-    margin: 4rem auto;
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    gap: 4rem;
-}
-
-.hero-left {
-    flex: 1.2;
-}
-
-.hero-left h1 {
-    font-size: 2rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    letter-spacing: -0.5px;
-}
-
-.subtitle {
-    color: var(--text-muted);
-    font-size: 1rem;
-    margin-bottom: 2rem;
-}
-
-.hero-cta {
-    display: flex;
-    gap: 1rem;
-}
-
-.btn-primary, .btn-secondary {
-    text-decoration: none;
-    font-size: 0.85rem;
-    padding: 0.8rem 1.5rem;
-    border-radius: 4px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.btn-primary {
-    background-color: var(--accent);
-    color: #ffffff;
-}
-
-.btn-primary:hover {
-    background-color: var(--accent-hover);
-}
-
-.btn-secondary {
-    border: 1px solid var(--border-color);
-    color: var(--text-muted);
-    background: var(--card-bg);
-}
-
-.btn-secondary:hover {
-    border-color: var(--text-main);
-    color: var(--text-main);
-}
-
-.hero-right {
-    flex: 0.8;
-    display: flex;
-    justify-content: center;
-}
-
-.image-frame {
-    border: 1px solid var(--border-color);
-    padding: 10px;
-    background: var(--card-bg);
-    border-radius: 8px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-
-.profile-img {
-    width: 240px;
-    height: 240px;
-    object-fit: cover;
-    border-radius: 4px;
-}
-
-/* --- Projects Section --- */
-.projects-section {
-    max-width: 1100px;
-    margin: 6rem auto;
-    padding: 0 2rem;
-}
-
-.section-title {
-    font-size: 1.3rem;
-    font-weight: 600;
-    margin-bottom: 2.5rem;
-    color: var(--text-muted);
-}
-
-.projects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-    gap: 2.5rem;
-}
-
-.project-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    overflow: hidden;
-    transition: transform 0.3s ease, border-color 0.3s ease;
-}
-
-.project-card:hover {
+.project-card-link:hover .project-card {
     transform: translateY(-4px);
-    border-color: #cbd5e1;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
 }
 
-.card-image-wrapper {
-    background: #f1f5f9;
-    height: 220px;
-    border-bottom: 1px solid var(--border-color);
-    overflow: hidden;
-}
-
-.card-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.card-content {
-    padding: 1.5rem;
-}
-
-.card-content h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.8rem;
-}
-
-.card-content p {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    margin-bottom: 1.5rem;
-}
-
-.tags {
+/* ── Image placeholder (replaces .jpg) ── */
+.card-image-placeholder {
     display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 180px;
+    background: #0f1318;
+    border-bottom: 1px solid #1e2a38;
+    position: relative;
 }
 
-.tags span {
-    font-size: 0.75rem;
-    background: #f1f5f9;
-    padding: 0.3rem 0.6rem;
-    border-radius: 4px;
-    color: var(--text-muted);
+.card-image-placeholder .placeholder-label {
+    font-family: 'Fira Code', monospace;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: #00ffe7;
+    opacity: 0.6;
 }
 
-/* --- Footer --- */
-.footer {
-    text-align: center;
-    padding: 4rem 2rem;
-    border-top: 1px solid var(--border-color);
-    font-size: 0.8rem;
-    color: var(--text-muted);
+.card-image-placeholder--dim .placeholder-label {
+    color: #4a6070;
+    opacity: 0.5;
 }
 
-/* Mobile Responsive Optimization */
-@media (max-width: 768px) {
-    .hero-section {
-        flex-direction: column-reverse;
-        text-align: center;
-        gap: 2rem;
-        margin: 2rem auto;
-    }
-    .hero-cta {
-        justify-content: center;
-    }
-    .projects-grid {
-        grid-template-columns: 1fr;
-    }
+/* ── Coming Soon badge ── */
+.coming-soon-badge {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #0f1318;
+    background: #4a6070;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+/* ── Disabled card (SIEM — not yet live) ── */
+.project-card--disabled {
+    opacity: 0.55;
+    cursor: default;
+    pointer-events: none;
 }
