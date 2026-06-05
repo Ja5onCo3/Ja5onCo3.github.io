@@ -115,12 +115,15 @@ label {
 /* Custom Minimalist Slider */
 input[type="range"] {
     -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     width: 100%;
     background: transparent;
 }
 
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
+    appearance: none;
     height: 18px;
     width: 10px;
     background: var(--term-green);
