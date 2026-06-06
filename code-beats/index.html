@@ -641,12 +641,22 @@
       </div>
 
       <div>
+        <span class="section-label">Bass</span>
+        <div class="readout-grid" style="grid-template-columns: repeat(3,1fr);">
+          <div class="readout-card"><div class="rc-label">Bass Wave</div><div class="rc-value" id="rd-bass-wave">SINE</div></div>
+          <div class="readout-card"><div class="rc-label">Bass Vol</div><div class="rc-value green" id="rd-bass-vol">0.70</div></div>
+          <div class="readout-card"><div class="rc-label">Bass Reverb</div><div class="rc-value purple" id="rd-bass-reverb">0.00</div></div>
+        </div>
+      </div>
+
+      <div>
         <span class="section-label">Drum Sequencer</span>
         <div class="step-bar"><div></div><div class="step-bar-inner" id="step-numbers"></div></div>
         <div class="drum-sequencer">
           <div class="drum-row kick-row"><div class="drum-label kick">Kick</div><div class="drum-grid" id="grid-kick"></div></div>
           <div class="drum-row snare-row"><div class="drum-label snare">Snare</div><div class="drum-grid" id="grid-snare"></div></div>
           <div class="drum-row hihat-row"><div class="drum-label hihat">Hi-Hat</div><div class="drum-grid" id="grid-hihat"></div></div>
+          <div class="drum-row bass-row"><div class="drum-label bass">Bass</div><div class="drum-grid" id="grid-bass"></div></div>
         </div>
       </div>
 
@@ -795,7 +805,16 @@ const state = {
     kick:  new Array(STEPS).fill(0),
     snare: new Array(STEPS).fill(0),
     hihat: new Array(STEPS).fill(0),
-  }
+  },
+  bassWaveType: 'sine',
+  bassVolume:   0.7,
+  bassPattern:  ['0','0','0','0','0','0','0','0'],
+  bassAdsr: { attack: 0.05, decay: 0.2, sustain: 0.6, release: 0.4 },
+  bassFx:   { reverb: 0.0, delay: 0.0 },
+  bassSynth:    null,
+  bassVol:      null,
+  bassReverbFx: null,
+  bassDelayFx:  null,
 };
 
 // ── DOM refs ───────────────────────────────
@@ -941,6 +960,16 @@ async function initAudio() {
   state.kickSynth  = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 8, envelope: { attack: 0.001, decay: 0.3, sustain: 0, release: 0.1 } }).chain(state.vol, Tone.getDestination());
   state.snareSynth = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.05 } }).chain(state.vol, Tone.getDestination());
   state.hihatSynth = new Tone.MetalSynth({ frequency: 400, harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5, envelope: { attack: 0.001, decay: 0.05, release: 0.01 } }).chain(state.vol, Tone.getDestination());
+  state.bassReverbFx = new Tone.Reverb({ decay: 3, wet: state.bassFx.reverb });
+  state.bassDelayFx  = new Tone.FeedbackDelay({ delayTime: '8n', feedback: 0.3, wet: state.bassFx.delay });
+  await state.bassReverbFx.generate();
+
+  state.bassVol    = new Tone.Volume(Tone.gainToDb(state.bassVolume));
+  state.bassSynth  = new Tone.Synth({
+    oscillator: { type: state.bassWaveType },
+    envelope:   { ...state.bassAdsr },
+  }).chain(state.bassDelayFx, state.bassReverbFx, state.bassVol, Tone.getDestination());
+
 
   log('// Audio context started. Ready.', 'ok');
   setStatus('● READY', 'ready');
@@ -994,6 +1023,15 @@ function startDrumLoop() {
           }, time);
         }
       });
+    }
+    if (state.bassPattern.some(n => n !== '0')) {
+      const bassNote = state.bassPattern[step];
+      if (bassNote !== '0') {
+        state.bassSynth.triggerAttackRelease(bassNote, '8n', time);
+        Tone.getDraw().schedule(() => {
+          rdNote.textContent = bassNote;
+        }, time);
+      }
     }
     step = (step + 1) % STEPS;
   }, [...Array(STEPS).keys()], '8n');
@@ -1111,6 +1149,69 @@ function executeCode(code) {
       if (state.delayFx) state.delayFx.wet.value = val;
       rdDelay.textContent = val.toFixed(2); barDelay.style.width = `${val * 100}%`;
       log(`// delay → ${val.toFixed(2)}`, 'ok'); return;
+    }
+    if ((m = line.match(/^bass_synth\(\s*(\w+)\s*\)$/i))) {
+      const wave = m[1].toLowerCase();
+      if (!VALID_WAVES.includes(wave)) { log(`// Line ${lineNum}: unknown waveform "${wave}".`, 'err'); return; }
+      state.bassWaveType = wave;
+      if (state.bassSynth) state.bassSynth.oscillator.type = wave;
+      log(`// bass_synth → ${wave}`, 'ok'); return;
+    }
+    if ((m = line.match(/^bass_vol\(\s*([\d.]+)\s*\)$/i))) {
+      const val = parseFloat(m[1]);
+      if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: bass_vol must be 0.0–1.0.`, 'err'); return; }
+      state.bassVolume = val;
+      if (state.bassVol) state.bassVol.volume.value = Tone.gainToDb(val);
+      log(`// bass_vol → ${val.toFixed(2)}`, 'ok'); return;
+    }
+    if ((m = line.match(/^bass_attack\(\s*([\d.]+)\s*\)$/i))) {
+      const val = parseFloat(m[1]);
+      if (isNaN(val) || val < 0.001 || val > 2) { log(`// Line ${lineNum}: bass attack must be 0.001–2.0 s.`, 'err'); return; }
+      state.bassAdsr.attack = val;
+      if (state.bassSynth) state.bassSynth.envelope.attack = val;
+      log(`// bass_attack → ${val.toFixed(3)}`, 'ok'); return;
+    }
+    if ((m = line.match(/^bass_decay\(\s*([\d.]+)\s*\)$/i))) {
+      const val = parseFloat(m[1]);
+      if (isNaN(val) || val < 0.001 || val > 2) { log(`// Line ${lineNum}: bass decay must be 0.001–2.0 s.`, 'err'); return; }
+      state.bassAdsr.decay = val;
+      if (state.bassSynth) state.bassSynth.envelope.decay = val;
+      log(`// bass_decay → ${val.toFixed(3)}`, 'ok'); return;
+    }
+    if ((m = line.match(/^bass_sustain\(\s*([\d.]+)\s*\)$/i))) {
+      const val = parseFloat(m[1]);
+      if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: bass sustain must be 0.0–1.0.`, 'err'); return; }
+      state.bassAdsr.sustain = val;
+      if (state.bassSynth) state.bassSynth.envelope.sustain = val;
+      log(`// bass_sustain → ${val.toFixed(2)}`, 'ok'); return;
+    }
+    if ((m = line.match(/^bass_release\(\s*([\d.]+)\s*\)$/i))) {
+      const val = parseFloat(m[1]);
+      if (isNaN(val) || val < 0.001 || val > 4) { log(`// Line ${lineNum}: bass release must be 0.001–2.0 s.`, 'err'); return; }
+      state.bassAdsr.release = val;
+      if (state.bassSynth) state.bassSynth.envelope.release = val;
+      log(`// bass_release → ${val.toFixed(3)}`, 'ok'); return;
+    }
+    if ((m = line.match(/^bass_reverb\(\s*([\d.]+)\s*\)$/i))) {
+      const val = parseFloat(m[1]);
+      if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: bass reverb must be 0.0–1.0.`, 'err'); return; }
+      state.bassFx.reverb = val;
+      if (state.bassReverbFx) state.bassReverbFx.wet.value = val;
+      log(`// bass_reverb → ${val.toFixed(2)}`, 'ok'); return;
+    }
+    if ((m = line.match(/^bass_delay\(\s*([\d.]+)\s*\)$/i))) {
+      const val = parseFloat(m[1]);
+      if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: bass delay must be 0.0–1.0.`, 'err'); return; }
+      state.bassFx.delay = val;
+      if (state.bassDelayFx) state.bassDelayFx.wet.value = val;
+      log(`// bass_delay → ${val.toFixed(2)}`, 'ok'); return;
+    }
+    const bassPatM = line.match(/^bass\(\s*\[([^\]]+)\]\s*\)$/i);
+    if (bassPatM) {
+      const raw = bassPatM[1].split(',').map(n => n.trim());
+      if (raw.length !== STEPS) { log(`// Line ${lineNum}: bass pattern needs exactly ${STEPS} values. Got ${raw.length}.`, 'err'); return; }
+      state.bassPattern = raw;
+      log(`// bass → [${raw.join(',')}]`, 'ok'); return;
     }
 
     const kickM  = line.match(/^kick\(\s*\[([0-9,\s]+)\]\s*\)$/i);
