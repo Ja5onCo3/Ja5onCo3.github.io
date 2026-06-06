@@ -4,9 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Code Beats — Syntax-to-Synth Lab</title>
+  <meta name="description" content="Type code commands to generate synth sounds and beats. A browser-based audio synthesis playground built with Tone.js." />
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+
+  <!-- Tone.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+  <!-- CodeMirror 5 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
 
   <style>
     :root {
@@ -61,7 +72,7 @@
     }
     .logo span { color: var(--accent2); text-shadow: 0 0 12px var(--accent2); }
     .tagline {
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       color: var(--text-dim);
       letter-spacing: 0.2em;
       text-transform: uppercase;
@@ -78,6 +89,19 @@
       transition: all 0.15s;
     }
     .back-link:hover { color: var(--accent); border-color: var(--accent); }
+    .btn-help {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-help:hover { color: var(--accent3); border-color: var(--accent3); }
     .status-pill {
       font-size: 0.65rem;
       letter-spacing: 0.15em;
@@ -91,6 +115,72 @@
     .status-pill.active { border-color: var(--accent3); color: var(--accent3); animation: blink 1s step-start infinite; }
     .status-pill.loop   { border-color: var(--accent2); color: var(--accent2); animation: blink 1s step-start infinite; }
     @keyframes blink { 50% { opacity: 0.4; } }
+
+    /* ── HELP MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px 28px;
+      max-width: 540px;
+      width: 90%;
+      max-height: 80dvh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .modal h2 {
+      font-family: var(--font-head);
+      font-size: 0.9rem;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      margin-bottom: 16px;
+    }
+    .modal-section { margin-bottom: 16px; }
+    .modal-section h3 {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--accent3);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 4px;
+    }
+    .modal-section p {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      margin-bottom: 6px;
+    }
+    .cmd-table { width: 100%; border-collapse: collapse; }
+    .cmd-table td {
+      font-size: 0.72rem;
+      padding: 4px 6px;
+      vertical-align: top;
+    }
+    .cmd-table td:first-child { color: var(--accent); white-space: nowrap; padding-right: 14px; }
+    .cmd-table td:last-child  { color: var(--text-dim); }
+    .modal-close {
+      position: absolute;
+      top: 14px; right: 16px;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .modal-close:hover { color: var(--accent2); }
 
     /* ── WORKSPACE ── */
     .workspace {
@@ -127,25 +217,46 @@
     }
     .panel-header .dot.pink { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
 
-    /* ── LEFT: CODE PANE ── */
+    /* ── CodeMirror overrides ── */
     #code-pane { background: var(--bg-input); }
-    #code-editor {
+    .CodeMirror {
       flex: 1;
-      width: 100%;
-      resize: none;
-      background: transparent;
-      color: var(--accent);
-      font-family: var(--font-mono);
+      height: 100%;
+      background: var(--bg-input) !important;
+      font-family: var(--font-mono) !important;
       font-size: 0.85rem;
       line-height: 1.75;
-      padding: 14px 16px;
+      color: var(--accent) !important;
       border: none;
-      outline: none;
-      caret-color: var(--accent);
-      overflow-y: auto;
     }
-    #code-editor::placeholder { color: var(--text-dim); }
-    #code-editor:focus { box-shadow: inset 3px 0 0 var(--accent); }
+    .CodeMirror-scroll { padding: 8px 0; }
+    .CodeMirror-gutters {
+      background: var(--bg-panel) !important;
+      border-right: 1px solid var(--border) !important;
+    }
+    .CodeMirror-linenumber { color: var(--text-dim) !important; font-size: 0.72rem; }
+    .CodeMirror-cursor { border-left-color: var(--accent) !important; }
+    .CodeMirror-selected { background: rgba(0,255,231,0.12) !important; }
+    /* comment tokens → dim */
+    .cm-comment { color: var(--text-dim) !important; font-style: italic; }
+    /* function/keyword tokens → accent2 */
+    .cm-keyword, .cm-def, .cm-variable-2 { color: var(--accent2) !important; }
+    /* numbers → accent3 */
+    .cm-number { color: var(--accent3) !important; }
+    /* strings → green */
+    .cm-string { color: #39ff14 !important; }
+    /* punctuation / operators */
+    .cm-operator, .cm-punctuation { color: var(--text) !important; }
+
+    /* wrapper that holds CM and lets it flex */
+    #cm-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+    #cm-wrapper .CodeMirror { flex: 1; }
 
     .code-toolbar {
       display: flex;
@@ -228,7 +339,6 @@
       margin-bottom: 5px;
     }
 
-    /* oscilloscope */
     #waveform-canvas {
       width: 100%;
       height: 62px;
@@ -238,7 +348,6 @@
       background: var(--bg-input);
     }
 
-    /* readouts */
     .readout-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -268,7 +377,6 @@
     .rc-value.purple { color: #bf5fff; }
     .rc-value.orange { color: #ff8c42; }
 
-    /* ── ADSR ENVELOPE VISUALIZER ── */
     #adsr-canvas {
       width: 100%;
       height: 60px;
@@ -278,7 +386,6 @@
       background: var(--bg-input);
     }
 
-    /* ── EFFECTS ROW ── */
     .effects-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -290,7 +397,6 @@
       border-radius: var(--radius);
       padding: 8px 10px;
     }
-    .effect-card .rc-label { margin-bottom: 5px; }
     .effect-bar-track {
       height: 4px;
       background: var(--border);
@@ -306,7 +412,6 @@
     .effect-bar-fill.reverb { background: #bf5fff; box-shadow: 0 0 6px #bf5fff; }
     .effect-bar-fill.delay  { background: #ff8c42; box-shadow: 0 0 6px #ff8c42; }
 
-    /* ── DRUM SEQUENCER ── */
     .drum-sequencer { display: flex; flex-direction: column; gap: 6px; }
     .drum-row {
       display: grid;
@@ -324,11 +429,7 @@
     .drum-label.kick  { color: var(--kick-color); }
     .drum-label.snare { color: var(--snare-color); }
     .drum-label.hihat { color: var(--hihat-color); }
-    .drum-grid {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      gap: 4px;
-    }
+    .drum-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
     .drum-cell {
       aspect-ratio: 1;
       border-radius: 3px;
@@ -347,7 +448,6 @@
     .step-bar-inner { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
     .step-num { font-size: 0.52rem; color: var(--text-dim); text-align: center; }
 
-    /* console */
     .console-section { margin-top: auto; }
     #console-log {
       background: var(--bg-input);
@@ -364,7 +464,6 @@
     #console-log .log-err  { color: var(--accent2); }
     #console-log .log-info { color: var(--accent3); }
 
-    /* ── FOOTER ── */
     footer {
       padding: 6px 20px;
       border-top: 1px solid var(--border);
@@ -376,6 +475,12 @@
       justify-content: space-between;
       flex-shrink: 0;
     }
+    footer a {
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    footer a:hover { color: var(--accent); }
 
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -389,12 +494,72 @@
 </head>
 <body>
 
+<!-- ── HELP MODAL ── -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" id="modal-close">✕</button>
+    <h2>// How to Use Code Beats</h2>
+
+    <div class="modal-section">
+      <h3>Getting Started</h3>
+      <p>Type commands in the left panel and press <strong style="color:var(--accent)">▶ Run</strong> to execute. Each line is one command. Lines starting with <code style="color:var(--text-dim)">//</code> are comments and are ignored. Load a preset from the bar below the editor to hear something instantly.</p>
+    </div>
+
+    <div class="modal-section">
+      <h3>Synth &amp; Melody</h3>
+      <table class="cmd-table">
+        <tr><td>play(C4, 0.5)</td><td>Play note C4 for 0.5 seconds. Notes: A–G, sharps (#) and flats (b), octave 1–8</td></tr>
+        <tr><td>synth(sine)</td><td>Set waveform: sine | square | triangle | sawtooth</td></tr>
+        <tr><td>bpm(120)</td><td>Set tempo in beats per minute (40–240)</td></tr>
+        <tr><td>volume(0.8)</td><td>Master volume (0.0–1.0)</td></tr>
+      </table>
+    </div>
+
+    <div class="modal-section">
+      <h3>Envelope (ADSR)</h3>
+      <p>Shape how notes start, sustain, and fade. Changes are shown live in the ADSR curve diagram.</p>
+      <table class="cmd-table">
+        <tr><td>attack(0.02)</td><td>Time to reach full volume (0.001–2.0 s)</td></tr>
+        <tr><td>decay(0.1)</td><td>Time to drop to sustain level (0.001–2.0 s)</td></tr>
+        <tr><td>sustain(0.5)</td><td>Volume held while note is active (0.0–1.0)</td></tr>
+        <tr><td>release(0.8)</td><td>Time to fade after note ends (0.001–4.0 s)</td></tr>
+      </table>
+    </div>
+
+    <div class="modal-section">
+      <h3>Effects</h3>
+      <table class="cmd-table">
+        <tr><td>reverb(0.6)</td><td>Room reverb wet mix (0.0–1.0)</td></tr>
+        <tr><td>delay(0.3)</td><td>Echo feedback delay wet mix (0.0–1.0)</td></tr>
+      </table>
+    </div>
+
+    <div class="modal-section">
+      <h3>Drum Sequencer</h3>
+      <p>Pass an 8-step array of 1s and 0s. Combine with <code style="color:var(--accent)">loop(true)</code> to start the sequencer. You can also click cells directly on the grid.</p>
+      <table class="cmd-table">
+        <tr><td>kick([1,0,0,0,1,0,0,0])</td><td>Kick drum pattern</td></tr>
+        <tr><td>snare([0,0,1,0,0,0,1,0])</td><td>Snare pattern</td></tr>
+        <tr><td>hihat([1,1,1,1,1,1,1,1])</td><td>Hi-hat pattern</td></tr>
+        <tr><td>loop(true)</td><td>Start looping (true | false)</td></tr>
+      </table>
+    </div>
+
+    <div class="modal-section">
+      <h3>Tips</h3>
+      <p>Commands execute top to bottom. Set synth, bpm, and envelope before play() for best results. The ↺ Loop button toggles the drum sequencer without re-running code. Stop clears all playback.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── HEADER ── -->
 <header>
   <div>
     <div class="logo">CODE<span>BEATS</span></div>
-    <div class="tagline">Syntax-to-Synth Lab · Phase 4</div>
+    <div class="tagline">Syntax-to-Synth Lab</div>
   </div>
   <div class="header-right">
+    <button class="btn-help" id="btn-help">? How to Use</button>
     <a href="../index.html" class="back-link">← Hub</a>
     <span id="status" class="status-pill ready">● READY</span>
   </div>
@@ -408,38 +573,13 @@
       <span class="dot"></span>
       Code Input
     </div>
-
-    <textarea id="code-editor" spellcheck="false" placeholder="// ── Synth & Melody ──────────────────────
-//   play(C4, 0.5)              → note + duration (s)
-//   synth(sine)                → sine|square|triangle|sawtooth
-//   bpm(120)                   → tempo 40–240
-//   volume(0.8)                → master vol 0.0–1.0
-//
-// ── Envelope (ADSR) ──────────────────────
-//   attack(0.02)               → 0.001–2.0 s
-//   decay(0.1)                 → 0.001–2.0 s
-//   sustain(0.5)               → 0.0–1.0
-//   release(0.8)               → 0.001–4.0 s
-//
-// ── Effects ───────────────────────────────
-//   reverb(0.6)                → 0.0–1.0
-//   delay(0.3)                 → 0.0–1.0
-//
-// ── Drums ─────────────────────────────────
-//   kick([1,0,0,0,1,0,0,0])
-//   snare([0,0,1,0,0,0,1,0])
-//   hihat([1,1,1,1,1,1,1,1])
-//   loop(true)
-//
-// Press RUN to execute ↓"></textarea>
-
+    <div id="cm-wrapper"></div>
     <div class="code-toolbar">
       <button class="btn btn-run"  id="btn-run">▶ Run</button>
       <button class="btn btn-stop" id="btn-stop">■ Stop</button>
       <button class="btn btn-loop" id="btn-loop">↺ Loop</button>
       <button class="btn btn-clear" id="btn-clear">Clear</button>
     </div>
-
     <div class="preset-bar">
       <span>Presets:</span>
       <button class="btn-preset" data-preset="basic">Basic</button>
@@ -457,118 +597,62 @@
       <span class="dot pink"></span>
       Synth Output
     </div>
-
     <div class="synth-body">
 
-      <!-- Oscilloscope -->
       <div>
         <span class="section-label">Oscilloscope</span>
         <canvas id="waveform-canvas"></canvas>
       </div>
 
-      <!-- Readouts: row 1 — synth params -->
       <div class="readout-grid">
-        <div class="readout-card">
-          <div class="rc-label">Waveform</div>
-          <div class="rc-value" id="rd-wave">SINE</div>
-        </div>
-        <div class="readout-card">
-          <div class="rc-label">BPM</div>
-          <div class="rc-value yellow" id="rd-bpm">120</div>
-        </div>
-        <div class="readout-card">
-          <div class="rc-label">Volume</div>
-          <div class="rc-value green" id="rd-vol">0.80</div>
-        </div>
-        <div class="readout-card">
-          <div class="rc-label">Last Note</div>
-          <div class="rc-value pink" id="rd-note">—</div>
-        </div>
-        <div class="readout-card">
-          <div class="rc-label">Duration</div>
-          <div class="rc-value" id="rd-dur">—</div>
-        </div>
-        <div class="readout-card">
-          <div class="rc-label">Loop</div>
-          <div class="rc-value" id="rd-loop">OFF</div>
-        </div>
+        <div class="readout-card"><div class="rc-label">Waveform</div><div class="rc-value" id="rd-wave">SINE</div></div>
+        <div class="readout-card"><div class="rc-label">BPM</div><div class="rc-value yellow" id="rd-bpm">120</div></div>
+        <div class="readout-card"><div class="rc-label">Volume</div><div class="rc-value green" id="rd-vol">0.80</div></div>
+        <div class="readout-card"><div class="rc-label">Last Note</div><div class="rc-value pink" id="rd-note">—</div></div>
+        <div class="readout-card"><div class="rc-label">Duration</div><div class="rc-value" id="rd-dur">—</div></div>
+        <div class="readout-card"><div class="rc-label">Loop</div><div class="rc-value" id="rd-loop">OFF</div></div>
       </div>
 
-      <!-- ADSR Envelope Visualizer -->
       <div>
         <span class="section-label">Envelope (ADSR)</span>
         <canvas id="adsr-canvas"></canvas>
-        <!-- ADSR readout row -->
-        <div class="readout-grid" style="margin-top:5px; grid-template-columns: repeat(4,1fr);">
-          <div class="readout-card">
-            <div class="rc-label">Attack</div>
-            <div class="rc-value" id="rd-attack">0.02</div>
-          </div>
-          <div class="readout-card">
-            <div class="rc-label">Decay</div>
-            <div class="rc-value yellow" id="rd-decay">0.10</div>
-          </div>
-          <div class="readout-card">
-            <div class="rc-label">Sustain</div>
-            <div class="rc-value green" id="rd-sustain">0.50</div>
-          </div>
-          <div class="readout-card">
-            <div class="rc-label">Release</div>
-            <div class="rc-value pink" id="rd-release">0.80</div>
-          </div>
+        <div class="readout-grid" style="margin-top:5px; grid-template-columns:repeat(4,1fr);">
+          <div class="readout-card"><div class="rc-label">Attack</div><div class="rc-value" id="rd-attack">0.020</div></div>
+          <div class="readout-card"><div class="rc-label">Decay</div><div class="rc-value yellow" id="rd-decay">0.100</div></div>
+          <div class="readout-card"><div class="rc-label">Sustain</div><div class="rc-value green" id="rd-sustain">0.50</div></div>
+          <div class="readout-card"><div class="rc-label">Release</div><div class="rc-value pink" id="rd-release">0.800</div></div>
         </div>
       </div>
 
-      <!-- Effects -->
       <div>
         <span class="section-label">Effects</span>
         <div class="effects-row">
           <div class="effect-card">
             <div class="rc-label">Reverb</div>
             <div class="rc-value purple" id="rd-reverb">0.00</div>
-            <div class="effect-bar-track">
-              <div class="effect-bar-fill reverb" id="bar-reverb" style="width:0%"></div>
-            </div>
+            <div class="effect-bar-track"><div class="effect-bar-fill reverb" id="bar-reverb" style="width:0%"></div></div>
           </div>
           <div class="effect-card">
             <div class="rc-label">Delay</div>
             <div class="rc-value orange" id="rd-delay">0.00</div>
-            <div class="effect-bar-track">
-              <div class="effect-bar-fill delay" id="bar-delay" style="width:0%"></div>
-            </div>
+            <div class="effect-bar-track"><div class="effect-bar-fill delay" id="bar-delay" style="width:0%"></div></div>
           </div>
         </div>
       </div>
 
-      <!-- Drum Sequencer -->
       <div>
         <span class="section-label">Drum Sequencer</span>
-        <div class="step-bar">
-          <div></div>
-          <div class="step-bar-inner" id="step-numbers"></div>
-        </div>
+        <div class="step-bar"><div></div><div class="step-bar-inner" id="step-numbers"></div></div>
         <div class="drum-sequencer">
-          <div class="drum-row kick-row"  data-instrument="kick">
-            <div class="drum-label kick">Kick</div>
-            <div class="drum-grid" id="grid-kick"></div>
-          </div>
-          <div class="drum-row snare-row" data-instrument="snare">
-            <div class="drum-label snare">Snare</div>
-            <div class="drum-grid" id="grid-snare"></div>
-          </div>
-          <div class="drum-row hihat-row" data-instrument="hihat">
-            <div class="drum-label hihat">Hi-Hat</div>
-            <div class="drum-grid" id="grid-hihat"></div>
-          </div>
+          <div class="drum-row kick-row"><div class="drum-label kick">Kick</div><div class="drum-grid" id="grid-kick"></div></div>
+          <div class="drum-row snare-row"><div class="drum-label snare">Snare</div><div class="drum-grid" id="grid-snare"></div></div>
+          <div class="drum-row hihat-row"><div class="drum-label hihat">Hi-Hat</div><div class="drum-grid" id="grid-hihat"></div></div>
         </div>
       </div>
 
-      <!-- Console -->
       <div class="console-section">
         <span class="section-label">Console</span>
-        <div id="console-log">
-          <span class="log-info">// Code Beats Phase 4 — Envelope &amp; Effects ready.</span><br>
-        </div>
+        <div id="console-log"><span class="log-info">// Code Beats — ready. Load a preset or type commands.</span><br></div>
       </div>
 
     </div>
@@ -576,22 +660,37 @@
 </div>
 
 <footer>
-  <span>CODE BEATS — Phase 4 · Envelope &amp; Effects</span>
-  <span>Tone.js v14 · GitHub Pages</span>
+  <span>© 2026 Jason C. — <a href="../index.html">Portfolio Hub</a></span>
+  <span>Built with Tone.js &amp; CodeMirror · GitHub Pages</span>
 </footer>
 
 
 <script>
 /* ════════════════════════════════════════════
-   CODE BEATS — Phase 4
-   ADSR envelope commands + reverb/delay effects
-   Live ADSR curve visualizer
-   All Phase 2 & 3 commands retained
+   CODE BEATS — Final (Phase 5)
+   CodeMirror editor, How to Use modal,
+   clean footer. All Phase 2–4 features intact.
    ════════════════════════════════════════════ */
+
+// ── CodeMirror init ────────────────────────
+const cmEditor = CodeMirror(document.getElementById('cm-wrapper'), {
+  value: '',
+  mode: 'javascript',
+  theme: 'dracula',
+  lineNumbers: true,
+  indentWithTabs: false,
+  tabSize: 2,
+  lineWrapping: false,
+  autofocus: false,
+  extraKeys: {
+    'Ctrl-Enter': () => document.getElementById('btn-run').click(),
+  }
+});
 
 // ── Presets ────────────────────────────────
 const PRESETS = {
-  basic: `// Basic Note
+  basic:
+`// Basic Note
 synth(sine)
 bpm(120)
 volume(0.8)
@@ -601,7 +700,8 @@ sustain(0.5)
 release(0.8)
 play(C4, 0.5)`,
 
-  dreamy: `// Dreamy Pad
+  dreamy:
+`// Dreamy Pad
 synth(sine)
 bpm(80)
 volume(0.7)
@@ -615,7 +715,8 @@ play(C4, 1.5)
 play(E4, 1.5)
 play(G4, 1.5)`,
 
-  punchy: `// Punchy Lead
+  punchy:
+`// Punchy Lead
 synth(square)
 bpm(140)
 volume(0.75)
@@ -629,7 +730,8 @@ play(E4, 0.2)
 play(G4, 0.2)
 play(C5, 0.4)`,
 
-  groove: `// Groove
+  groove:
+`// Groove
 synth(sine)
 bpm(95)
 volume(0.7)
@@ -643,7 +745,8 @@ snare([0,0,1,0,0,1,0,0])
 hihat([1,0,1,1,0,1,1,0])
 loop(true)`,
 
-  hiphop: `// Hip-Hop Beat
+  hiphop:
+`// Hip-Hop Beat
 synth(sawtooth)
 bpm(85)
 volume(0.75)
@@ -658,7 +761,8 @@ snare([0,0,0,1,0,0,0,1])
 hihat([1,1,0,1,1,1,0,1])
 loop(true)`,
 
-  ambient: `// Ambient Wash
+  ambient:
+`// Ambient Wash
 synth(triangle)
 bpm(60)
 volume(0.65)
@@ -680,26 +784,12 @@ const STEPS       = 8;
 
 // ── State ──────────────────────────────────
 const state = {
-  melodySynth: null,
-  kickSynth:   null,
-  snareSynth:  null,
-  hihatSynth:  null,
-  vol:         null,
-  analyser:    null,
-  reverbFx:    null,
-  delayFx:     null,
-  seqLoop:     null,
-
-  waveType:    'sine',
-  bpm:         120,
-  volume:      0.8,
-  loopEnabled: false,
-  isPlaying:   false,
-  currentStep: -1,
-
+  melodySynth: null, kickSynth: null, snareSynth: null, hihatSynth: null,
+  vol: null, analyser: null, reverbFx: null, delayFx: null, seqLoop: null,
+  waveType: 'sine', bpm: 120, volume: 0.8,
+  loopEnabled: false, isPlaying: false, currentStep: -1,
   adsr: { attack: 0.02, decay: 0.1, sustain: 0.5, release: 0.8 },
   fx:   { reverb: 0.0, delay: 0.0 },
-
   patterns: {
     kick:  new Array(STEPS).fill(0),
     snare: new Array(STEPS).fill(0),
@@ -708,31 +798,38 @@ const state = {
 };
 
 // ── DOM refs ───────────────────────────────
-const editor      = document.getElementById('code-editor');
-const btnRun      = document.getElementById('btn-run');
-const btnStop     = document.getElementById('btn-stop');
-const btnLoop     = document.getElementById('btn-loop');
-const btnClear    = document.getElementById('btn-clear');
-const statusEl    = document.getElementById('status');
-const rdWave      = document.getElementById('rd-wave');
-const rdBpm       = document.getElementById('rd-bpm');
-const rdVol       = document.getElementById('rd-vol');
-const rdNote      = document.getElementById('rd-note');
-const rdDur       = document.getElementById('rd-dur');
-const rdLoop      = document.getElementById('rd-loop');
-const rdAttack    = document.getElementById('rd-attack');
-const rdDecay     = document.getElementById('rd-decay');
-const rdSustain   = document.getElementById('rd-sustain');
-const rdRelease   = document.getElementById('rd-release');
-const rdReverb    = document.getElementById('rd-reverb');
-const rdDelay     = document.getElementById('rd-delay');
-const barReverb   = document.getElementById('bar-reverb');
-const barDelay    = document.getElementById('bar-delay');
-const consoleEl   = document.getElementById('console-log');
-const canvas      = document.getElementById('waveform-canvas');
-const ctx2d       = canvas.getContext('2d');
-const adsrCanvas  = document.getElementById('adsr-canvas');
-const adsrCtx     = adsrCanvas.getContext('2d');
+const btnRun    = document.getElementById('btn-run');
+const btnStop   = document.getElementById('btn-stop');
+const btnLoop   = document.getElementById('btn-loop');
+const btnClear  = document.getElementById('btn-clear');
+const btnHelp   = document.getElementById('btn-help');
+const modalOverlay = document.getElementById('modal-overlay');
+const modalClose   = document.getElementById('modal-close');
+const statusEl  = document.getElementById('status');
+const rdWave    = document.getElementById('rd-wave');
+const rdBpm     = document.getElementById('rd-bpm');
+const rdVol     = document.getElementById('rd-vol');
+const rdNote    = document.getElementById('rd-note');
+const rdDur     = document.getElementById('rd-dur');
+const rdLoop    = document.getElementById('rd-loop');
+const rdAttack  = document.getElementById('rd-attack');
+const rdDecay   = document.getElementById('rd-decay');
+const rdSustain = document.getElementById('rd-sustain');
+const rdRelease = document.getElementById('rd-release');
+const rdReverb  = document.getElementById('rd-reverb');
+const rdDelay   = document.getElementById('rd-delay');
+const barReverb = document.getElementById('bar-reverb');
+const barDelay  = document.getElementById('bar-delay');
+const consoleEl = document.getElementById('console-log');
+const canvas    = document.getElementById('waveform-canvas');
+const ctx2d     = canvas.getContext('2d');
+const adsrCanvas = document.getElementById('adsr-canvas');
+const adsrCtx    = adsrCanvas.getContext('2d');
+
+// ── Help modal ─────────────────────────────
+btnHelp.addEventListener('click', () => modalOverlay.classList.add('open'));
+modalClose.addEventListener('click', () => modalOverlay.classList.remove('open'));
+modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) modalOverlay.classList.remove('open'); });
 
 // ── Console ────────────────────────────────
 function log(msg, type = 'info') {
@@ -748,7 +845,7 @@ function setStatus(label, cls) {
   statusEl.className = `status-pill ${cls}`;
 }
 
-// ── ADSR Visualizer ────────────────────────
+// ── ADSR visualizer ────────────────────────
 function resizeADSR() {
   adsrCanvas.width  = adsrCanvas.offsetWidth;
   adsrCanvas.height = adsrCanvas.offsetHeight;
@@ -761,36 +858,22 @@ function drawADSR() {
   const W = adsrCanvas.width, H = adsrCanvas.height;
   const { attack, decay, sustain, release } = state.adsr;
   adsrCtx.clearRect(0, 0, W, H);
-
-  // Normalize segments to available width
-  const total  = attack + decay + 0.3 + release; // 0.3 = sustain hold time (fixed visual)
-  const aW = (attack  / total) * W;
-  const dW = (decay   / total) * W;
-  const sW = (0.3     / total) * W;
-  const rW = (release / total) * W;
-  const pad = 6;
-  const top = pad, bot = H - pad;
-
+  const total = attack + decay + 0.3 + release;
+  const aW = (attack / total) * W, dW = (decay / total) * W;
+  const sW = (0.3 / total) * W,   rW = (release / total) * W;
+  const pad = 6, top = pad, bot = H - pad;
+  const susY = top + (1 - sustain) * (bot - top);
   adsrCtx.beginPath();
   adsrCtx.strokeStyle = '#00ffe7';
   adsrCtx.lineWidth   = 1.5;
   adsrCtx.shadowColor = '#00ffe7';
   adsrCtx.shadowBlur  = 4;
-
-  // Start → Attack peak
   adsrCtx.moveTo(0, bot);
   adsrCtx.lineTo(aW, top);
-  // Attack → Decay to sustain level
-  const susY = top + (1 - sustain) * (bot - top);
   adsrCtx.lineTo(aW + dW, susY);
-  // Sustain hold
   adsrCtx.lineTo(aW + dW + sW, susY);
-  // Release → zero
   adsrCtx.lineTo(aW + dW + sW + rW, bot);
-
   adsrCtx.stroke();
-
-  // Fill under curve
   adsrCtx.lineTo(0, bot);
   adsrCtx.closePath();
   const grad = adsrCtx.createLinearGradient(0, top, 0, bot);
@@ -801,7 +884,7 @@ function drawADSR() {
 }
 drawADSR();
 
-// ── Step numbers ───────────────────────────
+// ── Step numbers & drum grids ──────────────
 function buildStepNumbers() {
   const bar = document.getElementById('step-numbers');
   bar.innerHTML = '';
@@ -814,14 +897,12 @@ function buildStepNumbers() {
 }
 buildStepNumbers();
 
-// ── Drum grids ─────────────────────────────
 function buildDrumGrid(instrument) {
   const grid = document.getElementById(`grid-${instrument}`);
   grid.innerHTML = '';
   state.patterns[instrument].forEach((on, i) => {
     const cell = document.createElement('div');
     cell.className = 'drum-cell' + (on ? ' on' : '');
-    cell.dataset.step = i;
     cell.addEventListener('click', () => {
       state.patterns[instrument][i] ^= 1;
       cell.classList.toggle('on', state.patterns[instrument][i] === 1);
@@ -829,15 +910,11 @@ function buildDrumGrid(instrument) {
     grid.appendChild(cell);
   });
 }
-function buildAllGrids() {
-  buildDrumGrid('kick');
-  buildDrumGrid('snare');
-  buildDrumGrid('hihat');
-}
+function buildAllGrids() { ['kick','snare','hihat'].forEach(buildDrumGrid); }
 buildAllGrids();
 
 function highlightStep(step) {
-  ['kick', 'snare', 'hihat'].forEach(inst => {
+  ['kick','snare','hihat'].forEach(inst => {
     document.querySelectorAll(`#grid-${inst} .drum-cell`).forEach((c, i) => {
       c.classList.toggle('active', i === step);
     });
@@ -851,45 +928,26 @@ async function initAudio() {
 
   state.analyser = new Tone.Analyser('waveform', 256);
   state.vol      = new Tone.Volume(Tone.gainToDb(state.volume));
-
-  // Effects chain
   state.reverbFx = new Tone.Reverb({ decay: 3, wet: state.fx.reverb });
   state.delayFx  = new Tone.FeedbackDelay({ delayTime: '8n', feedback: 0.3, wet: state.fx.delay });
   await state.reverbFx.generate();
 
-  // Melody synth → delay → reverb → vol → analyser → out
   state.melodySynth = new Tone.Synth({
     oscillator: { type: state.waveType },
     envelope:   { ...state.adsr },
   }).chain(state.delayFx, state.reverbFx, state.vol, state.analyser, Tone.getDestination());
 
-  // Drums → vol → out (no melody effects on drums)
-  state.kickSynth = new Tone.MembraneSynth({
-    pitchDecay: 0.05, octaves: 8,
-    envelope: { attack: 0.001, decay: 0.3, sustain: 0, release: 0.1 },
-  }).chain(state.vol, Tone.getDestination());
+  state.kickSynth  = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 8, envelope: { attack: 0.001, decay: 0.3, sustain: 0, release: 0.1 } }).chain(state.vol, Tone.getDestination());
+  state.snareSynth = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.05 } }).chain(state.vol, Tone.getDestination());
+  state.hihatSynth = new Tone.MetalSynth({ frequency: 400, harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5, envelope: { attack: 0.001, decay: 0.05, release: 0.01 } }).chain(state.vol, Tone.getDestination());
 
-  state.snareSynth = new Tone.NoiseSynth({
-    noise: { type: 'white' },
-    envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.05 },
-  }).chain(state.vol, Tone.getDestination());
-
-  state.hihatSynth = new Tone.MetalSynth({
-    frequency: 400, harmonicity: 5.1, modulationIndex: 32,
-    resonance: 4000, octaves: 1.5,
-    envelope: { attack: 0.001, decay: 0.05, release: 0.01 },
-  }).chain(state.vol, Tone.getDestination());
-
-  log('// Audio context started. Drum kit + FX ready.', 'ok');
+  log('// Audio context started. Ready.', 'ok');
   setStatus('● READY', 'ready');
   startOscilloscope();
 }
 
 // ── Oscilloscope ───────────────────────────
-function resizeCanvas() {
-  canvas.width  = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
-}
+function resizeCanvas() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
@@ -904,8 +962,7 @@ function startOscilloscope() {
     ctx2d.strokeStyle = state.isPlaying ? '#00ffe7' : '#1e2a38';
     ctx2d.lineWidth = 1.5;
     values.forEach((v, i) => {
-      const x = (i / values.length) * W;
-      const y = ((v + 1) / 2) * H;
+      const x = (i / values.length) * W, y = ((v + 1) / 2) * H;
       i === 0 ? ctx2d.moveTo(x, y) : ctx2d.lineTo(x, y);
     });
     ctx2d.stroke();
@@ -918,18 +975,14 @@ function startDrumLoop() {
   stopDrumLoop();
   Tone.getTransport().bpm.value = state.bpm;
   let step = 0;
-
   state.seqLoop = new Tone.Sequence((time) => {
     state.currentStep = step;
     Tone.getDraw().schedule(() => { highlightStep(step); }, time);
-
     if (state.patterns.kick[step])  { state.kickSynth.triggerAttackRelease('C1', '8n', time); state.isPlaying = true; }
     if (state.patterns.snare[step]) { state.snareSynth.triggerAttackRelease('8n', time); state.isPlaying = true; }
     if (state.patterns.hihat[step]) { state.hihatSynth.triggerAttackRelease('32n', time); state.isPlaying = true; }
-
     step = (step + 1) % STEPS;
   }, [...Array(STEPS).keys()], '8n');
-
   state.seqLoop.start(0);
   Tone.getTransport().start();
   setStatus('↺ LOOPING', 'loop');
@@ -940,11 +993,10 @@ function stopDrumLoop() {
   if (state.seqLoop) { state.seqLoop.stop(); state.seqLoop.dispose(); state.seqLoop = null; }
   Tone.getTransport().stop();
   highlightStep(-1);
-  state.isPlaying   = false;
+  state.isPlaying = false;
   state.currentStep = -1;
 }
 
-// ── Apply ADSR to synth ────────────────────
 function applyEnvelope() {
   if (!state.melodySynth) return;
   const { attack, decay, sustain, release } = state.adsr;
@@ -954,172 +1006,111 @@ function applyEnvelope() {
   state.melodySynth.envelope.release = release;
 }
 
-// ══════════════════════════════════════════
-//   COMMAND PARSER — Phase 2 + 3 + 4
-// ══════════════════════════════════════════
+// ── Command parser ─────────────────────────
 function executeCode(code) {
-  const rawLines = code.split('\n');
   const commands = [];
-  rawLines.forEach((raw, idx) => {
+  code.split('\n').forEach((raw, idx) => {
     const t = raw.trim();
     if (t && !t.startsWith('//')) commands.push({ text: t, lineNum: idx + 1 });
   });
-
   if (commands.length === 0) { log('// No executable commands found.', 'err'); return; }
   log(`// Executing ${commands.length} command(s)...`, 'info');
 
   const melodyNotes = [];
 
   commands.forEach(({ text: line, lineNum }) => {
+    let m;
 
-    // play(note, dur)
-    const playMatch = line.match(/^play\(\s*([A-Ga-g][#b]?\d)\s*,\s*([\d.]+)\s*\)$/i);
-    if (playMatch) {
-      const note = playMatch[1].toUpperCase();
-      const dur  = parseFloat(playMatch[2]);
+    if ((m = line.match(/^play\(\s*([A-Ga-g][#b]?\d)\s*,\s*([\d.]+)\s*\)$/i))) {
+      const note = m[1].toUpperCase(), dur = parseFloat(m[2]);
       if (!VALID_NOTES.test(note)) { log(`// Line ${lineNum}: invalid note "${note}".`, 'err'); return; }
       if (isNaN(dur) || dur <= 0 || dur > 8) { log(`// Line ${lineNum}: duration must be 0.1–8 s.`, 'err'); return; }
       melodyNotes.push({ note, dur }); return;
     }
-
-    // bpm(val)
-    const bpmMatch = line.match(/^bpm\(\s*(\d+)\s*\)$/i);
-    if (bpmMatch) {
-      const val = parseInt(bpmMatch[1]);
+    if ((m = line.match(/^bpm\(\s*(\d+)\s*\)$/i))) {
+      const val = parseInt(m[1]);
       if (val < 40 || val > 240) { log(`// Line ${lineNum}: bpm must be 40–240.`, 'err'); return; }
       state.bpm = val; Tone.getTransport().bpm.value = val; rdBpm.textContent = val;
       log(`// bpm → ${val}`, 'ok'); return;
     }
-
-    // synth(wave)
-    const synthMatch = line.match(/^synth\(\s*(\w+)\s*\)$/i);
-    if (synthMatch) {
-      const wave = synthMatch[1].toLowerCase();
+    if ((m = line.match(/^synth\(\s*(\w+)\s*\)$/i))) {
+      const wave = m[1].toLowerCase();
       if (!VALID_WAVES.includes(wave)) { log(`// Line ${lineNum}: unknown waveform "${wave}".`, 'err'); return; }
       state.waveType = wave;
       if (state.melodySynth) state.melodySynth.oscillator.type = wave;
       rdWave.textContent = wave.toUpperCase();
       log(`// synth → ${wave}`, 'ok'); return;
     }
-
-    // volume(val)
-    const volMatch = line.match(/^volume\(\s*([\d.]+)\s*\)$/i);
-    if (volMatch) {
-      const val = parseFloat(volMatch[1]);
+    if ((m = line.match(/^volume\(\s*([\d.]+)\s*\)$/i))) {
+      const val = parseFloat(m[1]);
       if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: volume must be 0.0–1.0.`, 'err'); return; }
       state.volume = val;
       if (state.vol) state.vol.volume.value = Tone.gainToDb(val);
-      rdVol.textContent = val.toFixed(2);
-      log(`// volume → ${val.toFixed(2)}`, 'ok'); return;
+      rdVol.textContent = val.toFixed(2); log(`// volume → ${val.toFixed(2)}`, 'ok'); return;
     }
-
-    // loop(bool)
-    const loopMatch = line.match(/^loop\(\s*(true|false)\s*\)$/i);
-    if (loopMatch) {
-      const val = loopMatch[1].toLowerCase() === 'true';
+    if ((m = line.match(/^loop\(\s*(true|false)\s*\)$/i))) {
+      const val = m[1].toLowerCase() === 'true';
       state.loopEnabled = val; rdLoop.textContent = val ? 'ON' : 'OFF';
       btnLoop.classList.toggle('active', val);
       log(`// loop → ${val}`, 'ok'); return;
     }
-
-    // ── ADSR ──────────────────────────────
-
-    // attack(val)
-    const atkMatch = line.match(/^attack\(\s*([\d.]+)\s*\)$/i);
-    if (atkMatch) {
-      const val = parseFloat(atkMatch[1]);
+    if ((m = line.match(/^attack\(\s*([\d.]+)\s*\)$/i))) {
+      const val = parseFloat(m[1]);
       if (isNaN(val) || val < 0.001 || val > 2) { log(`// Line ${lineNum}: attack must be 0.001–2.0 s.`, 'err'); return; }
-      state.adsr.attack = val; applyEnvelope();
-      rdAttack.textContent = val.toFixed(3); drawADSR();
+      state.adsr.attack = val; applyEnvelope(); rdAttack.textContent = val.toFixed(3); drawADSR();
       log(`// attack → ${val.toFixed(3)}`, 'ok'); return;
     }
-
-    // decay(val)
-    const decMatch = line.match(/^decay\(\s*([\d.]+)\s*\)$/i);
-    if (decMatch) {
-      const val = parseFloat(decMatch[1]);
+    if ((m = line.match(/^decay\(\s*([\d.]+)\s*\)$/i))) {
+      const val = parseFloat(m[1]);
       if (isNaN(val) || val < 0.001 || val > 2) { log(`// Line ${lineNum}: decay must be 0.001–2.0 s.`, 'err'); return; }
-      state.adsr.decay = val; applyEnvelope();
-      rdDecay.textContent = val.toFixed(3); drawADSR();
+      state.adsr.decay = val; applyEnvelope(); rdDecay.textContent = val.toFixed(3); drawADSR();
       log(`// decay → ${val.toFixed(3)}`, 'ok'); return;
     }
-
-    // sustain(val)
-    const susMatch = line.match(/^sustain\(\s*([\d.]+)\s*\)$/i);
-    if (susMatch) {
-      const val = parseFloat(susMatch[1]);
+    if ((m = line.match(/^sustain\(\s*([\d.]+)\s*\)$/i))) {
+      const val = parseFloat(m[1]);
       if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: sustain must be 0.0–1.0.`, 'err'); return; }
-      state.adsr.sustain = val; applyEnvelope();
-      rdSustain.textContent = val.toFixed(2); drawADSR();
+      state.adsr.sustain = val; applyEnvelope(); rdSustain.textContent = val.toFixed(2); drawADSR();
       log(`// sustain → ${val.toFixed(2)}`, 'ok'); return;
     }
-
-    // release(val)
-    const relMatch = line.match(/^release\(\s*([\d.]+)\s*\)$/i);
-    if (relMatch) {
-      const val = parseFloat(relMatch[1]);
+    if ((m = line.match(/^release\(\s*([\d.]+)\s*\)$/i))) {
+      const val = parseFloat(m[1]);
       if (isNaN(val) || val < 0.001 || val > 4) { log(`// Line ${lineNum}: release must be 0.001–4.0 s.`, 'err'); return; }
-      state.adsr.release = val; applyEnvelope();
-      rdRelease.textContent = val.toFixed(3); drawADSR();
+      state.adsr.release = val; applyEnvelope(); rdRelease.textContent = val.toFixed(3); drawADSR();
       log(`// release → ${val.toFixed(3)}`, 'ok'); return;
     }
-
-    // ── EFFECTS ───────────────────────────
-
-    // reverb(val)
-    const revMatch = line.match(/^reverb\(\s*([\d.]+)\s*\)$/i);
-    if (revMatch) {
-      const val = parseFloat(revMatch[1]);
+    if ((m = line.match(/^reverb\(\s*([\d.]+)\s*\)$/i))) {
+      const val = parseFloat(m[1]);
       if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: reverb must be 0.0–1.0.`, 'err'); return; }
       state.fx.reverb = val;
       if (state.reverbFx) state.reverbFx.wet.value = val;
-      rdReverb.textContent = val.toFixed(2);
-      barReverb.style.width = `${val * 100}%`;
+      rdReverb.textContent = val.toFixed(2); barReverb.style.width = `${val * 100}%`;
       log(`// reverb → ${val.toFixed(2)}`, 'ok'); return;
     }
-
-    // delay(val)
-    const delMatch = line.match(/^delay\(\s*([\d.]+)\s*\)$/i);
-    if (delMatch) {
-      const val = parseFloat(delMatch[1]);
+    if ((m = line.match(/^delay\(\s*([\d.]+)\s*\)$/i))) {
+      const val = parseFloat(m[1]);
       if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: delay must be 0.0–1.0.`, 'err'); return; }
       state.fx.delay = val;
       if (state.delayFx) state.delayFx.wet.value = val;
-      rdDelay.textContent = val.toFixed(2);
-      barDelay.style.width = `${val * 100}%`;
+      rdDelay.textContent = val.toFixed(2); barDelay.style.width = `${val * 100}%`;
       log(`// delay → ${val.toFixed(2)}`, 'ok'); return;
     }
 
-    // ── DRUMS ─────────────────────────────
-
-    const kickMatch = line.match(/^kick\(\s*\[([0-9,\s]+)\]\s*\)$/i);
-    if (kickMatch) {
-      const parsed = parseDrumPattern(kickMatch[1], 'kick', lineNum);
-      if (parsed) { state.patterns.kick = parsed; buildDrumGrid('kick'); log(`// kick → [${parsed.join(',')}]`, 'ok'); } return;
-    }
-
-    const snareMatch = line.match(/^snare\(\s*\[([0-9,\s]+)\]\s*\)$/i);
-    if (snareMatch) {
-      const parsed = parseDrumPattern(snareMatch[1], 'snare', lineNum);
-      if (parsed) { state.patterns.snare = parsed; buildDrumGrid('snare'); log(`// snare → [${parsed.join(',')}]`, 'ok'); } return;
-    }
-
-    const hihatMatch = line.match(/^hihat\(\s*\[([0-9,\s]+)\]\s*\)$/i);
-    if (hihatMatch) {
-      const parsed = parseDrumPattern(hihatMatch[1], 'hihat', lineNum);
-      if (parsed) { state.patterns.hihat = parsed; buildDrumGrid('hihat'); log(`// hihat → [${parsed.join(',')}]`, 'ok'); } return;
-    }
+    const kickM  = line.match(/^kick\(\s*\[([0-9,\s]+)\]\s*\)$/i);
+    const snareM = line.match(/^snare\(\s*\[([0-9,\s]+)\]\s*\)$/i);
+    const hihatM = line.match(/^hihat\(\s*\[([0-9,\s]+)\]\s*\)$/i);
+    if (kickM)  { const p = parseDrum(kickM[1],  'kick',  lineNum); if (p) { state.patterns.kick  = p; buildDrumGrid('kick');  log(`// kick → [${p.join(',')}]`,  'ok'); } return; }
+    if (snareM) { const p = parseDrum(snareM[1], 'snare', lineNum); if (p) { state.patterns.snare = p; buildDrumGrid('snare'); log(`// snare → [${p.join(',')}]`, 'ok'); } return; }
+    if (hihatM) { const p = parseDrum(hihatM[1], 'hihat', lineNum); if (p) { state.patterns.hihat = p; buildDrumGrid('hihat'); log(`// hihat → [${p.join(',')}]`, 'ok'); } return; }
 
     log(`// Line ${lineNum}: unknown command → "${line}"`, 'err');
   });
 
   if (melodyNotes.length > 0) playMelody(melodyNotes);
-
   const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1));
   if (state.loopEnabled && hasPattern) startDrumLoop();
 }
 
-function parseDrumPattern(raw, name, lineNum) {
+function parseDrum(raw, name, lineNum) {
   const arr = raw.split(',').map(n => parseInt(n.trim()));
   if (arr.length !== STEPS) { log(`// Line ${lineNum}: ${name} needs exactly ${STEPS} values. Got ${arr.length}.`, 'err'); return null; }
   if (arr.some(v => v !== 0 && v !== 1)) { log(`// Line ${lineNum}: ${name} values must be 0 or 1.`, 'err'); return null; }
@@ -1150,7 +1141,7 @@ function playMelody(notes) {
 btnRun.addEventListener('click', async () => {
   await initAudio();
   stopDrumLoop();
-  const code = editor.value;
+  const code = cmEditor.getValue();
   if (!code.trim()) { log('// Editor is empty.', 'err'); return; }
   executeCode(code);
 });
@@ -1180,14 +1171,21 @@ btnLoop.addEventListener('click', async () => {
   }
 });
 
-btnClear.addEventListener('click', () => { editor.value = ''; editor.focus(); });
+btnClear.addEventListener('click', () => { cmEditor.setValue(''); cmEditor.focus(); });
 
 document.querySelectorAll('.btn-preset').forEach(btn => {
   btn.addEventListener('click', () => {
     const key = btn.dataset.preset;
-    if (PRESETS[key]) { editor.value = PRESETS[key]; editor.focus(); log(`// Preset loaded: ${key}`, 'info'); }
+    if (PRESETS[key]) {
+      cmEditor.setValue(PRESETS[key]);
+      cmEditor.focus();
+      log(`// Preset loaded: ${key}`, 'info');
+    }
   });
 });
+
+// Ctrl+Enter shortcut hint in console
+log('// Tip: Ctrl+Enter to run. Click ? for command reference.', 'info');
 </script>
 </body>
 </html>
