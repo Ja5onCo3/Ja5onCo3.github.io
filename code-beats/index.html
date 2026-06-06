@@ -1036,7 +1036,7 @@ function executeCode(code) {
     let m;
 
     if ((m = line.match(/^play\(\s*([A-Ga-g][#b]?\d)\s*,\s*([\d.]+)\s*\)$/i))) {
-      const note = m[1].toUpperCase(), dur = parseFloat(m[2]);
+      const note = m[1].charAt(0).toUpperCase(), dur = parseFloat(m[2]);
       if (!VALID_NOTES.test(note)) { log(`// Line ${lineNum}: invalid note "${note}".`, 'err'); return; }
       if (isNaN(dur) || dur <= 0 || dur > 8) { log(`// Line ${lineNum}: duration must be 0.1–8 s.`, 'err'); return; }
       melodyNotes.push({ note, dur }); return;
