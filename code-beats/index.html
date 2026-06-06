@@ -10,21 +10,21 @@
 
   <style>
     :root {
-      --bg:        #0a0c10;
-      --bg-panel:  #0f1318;
-      --bg-input:  #080b0f;
-      --border:    #1e2a38;
-      --accent:    #00ffe7;
-      --accent2:   #ff3cac;
-      --accent3:   #ffe600;
-      --text:      #c8d8e8;
-      --text-dim:  #4a6070;
+      --bg:          #0a0c10;
+      --bg-panel:    #0f1318;
+      --bg-input:    #080b0f;
+      --border:      #1e2a38;
+      --accent:      #00ffe7;
+      --accent2:     #ff3cac;
+      --accent3:     #ffe600;
+      --text:        #c8d8e8;
+      --text-dim:    #4a6070;
       --kick-color:  #ff3cac;
       --snare-color: #ffe600;
       --hihat-color: #00ffe7;
-      --font-mono: 'Share Tech Mono', monospace;
-      --font-head: 'Orbitron', sans-serif;
-      --radius:    6px;
+      --font-mono:   'Share Tech Mono', monospace;
+      --font-head:   'Orbitron', sans-serif;
+      --radius:      6px;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -136,9 +136,9 @@
       background: transparent;
       color: var(--accent);
       font-family: var(--font-mono);
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       line-height: 1.75;
-      padding: 16px 18px;
+      padding: 14px 16px;
       border: none;
       outline: none;
       caret-color: var(--accent);
@@ -214,25 +214,24 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      padding: 14px;
+      gap: 12px;
+      padding: 12px 14px;
       overflow-y: auto;
     }
 
-    /* section labels */
     .section-label {
-      font-size: 0.62rem;
+      font-size: 0.6rem;
       letter-spacing: 0.18em;
       color: var(--text-dim);
       text-transform: uppercase;
       display: block;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
 
     /* oscilloscope */
     #waveform-canvas {
       width: 100%;
-      height: 70px;
+      height: 62px;
       display: block;
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -243,45 +242,81 @@
     .readout-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      gap: 6px;
     }
     .readout-card {
       background: var(--bg-input);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 8px 12px;
+      padding: 7px 10px;
     }
     .rc-label {
-      font-size: 0.55rem;
-      letter-spacing: 0.18em;
+      font-size: 0.52rem;
+      letter-spacing: 0.15em;
       color: var(--text-dim);
       text-transform: uppercase;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
     .rc-value {
       font-family: var(--font-head);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: var(--accent);
     }
     .rc-value.pink   { color: var(--accent2); }
     .rc-value.yellow { color: var(--accent3); }
     .rc-value.green  { color: #39ff14; }
+    .rc-value.purple { color: #bf5fff; }
+    .rc-value.orange { color: #ff8c42; }
+
+    /* ── ADSR ENVELOPE VISUALIZER ── */
+    #adsr-canvas {
+      width: 100%;
+      height: 60px;
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-input);
+    }
+
+    /* ── EFFECTS ROW ── */
+    .effects-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .effect-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+    }
+    .effect-card .rc-label { margin-bottom: 5px; }
+    .effect-bar-track {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .effect-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.2s ease;
+    }
+    .effect-bar-fill.reverb { background: #bf5fff; box-shadow: 0 0 6px #bf5fff; }
+    .effect-bar-fill.delay  { background: #ff8c42; box-shadow: 0 0 6px #ff8c42; }
 
     /* ── DRUM SEQUENCER ── */
-    .drum-sequencer {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+    .drum-sequencer { display: flex; flex-direction: column; gap: 6px; }
     .drum-row {
       display: grid;
-      grid-template-columns: 52px 1fr;
+      grid-template-columns: 46px 1fr;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .drum-label {
-      font-size: 0.62rem;
-      letter-spacing: 0.15em;
+      font-size: 0.58rem;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       text-align: right;
       padding-right: 4px;
@@ -289,7 +324,6 @@
     .drum-label.kick  { color: var(--kick-color); }
     .drum-label.snare { color: var(--snare-color); }
     .drum-label.hihat { color: var(--hihat-color); }
-
     .drum-grid {
       display: grid;
       grid-template-columns: repeat(8, 1fr);
@@ -303,38 +337,15 @@
       transition: background 0.08s, box-shadow 0.08s;
       cursor: pointer;
     }
+    .drum-row.kick-row  .drum-cell.on { background: var(--kick-color);  box-shadow: 0 0 7px var(--kick-color);  border-color: var(--kick-color); }
+    .drum-row.snare-row .drum-cell.on { background: var(--snare-color); box-shadow: 0 0 7px var(--snare-color); border-color: var(--snare-color); }
+    .drum-row.hihat-row .drum-cell.on { background: var(--hihat-color); box-shadow: 0 0 7px var(--hihat-color); border-color: var(--hihat-color); }
+    .drum-cell.active { outline: 2px solid var(--accent3); outline-offset: 1px; }
+    .drum-cell.on.active { filter: brightness(1.6); }
 
-    /* per-row colours when on */
-    .drum-row.kick-row  .drum-cell.on { background: var(--kick-color);  box-shadow: 0 0 8px var(--kick-color);  border-color: var(--kick-color); }
-    .drum-row.snare-row .drum-cell.on { background: var(--snare-color); box-shadow: 0 0 8px var(--snare-color); border-color: var(--snare-color); }
-    .drum-row.hihat-row .drum-cell.on { background: var(--hihat-color); box-shadow: 0 0 8px var(--hihat-color); border-color: var(--hihat-color); }
-
-    /* active step flash (yellow for all rows) */
-    .drum-cell.active {
-      outline: 2px solid var(--accent3);
-      outline-offset: 1px;
-    }
-    .drum-cell.on.active {
-      filter: brightness(1.6);
-    }
-
-    /* step counter bar */
-    .step-bar {
-      display: grid;
-      grid-template-columns: 52px 1fr;
-      gap: 8px;
-    }
-    .step-bar-inner {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      gap: 4px;
-    }
-    .step-num {
-      font-size: 0.55rem;
-      color: var(--text-dim);
-      text-align: center;
-      letter-spacing: 0;
-    }
+    .step-bar { display: grid; grid-template-columns: 46px 1fr; gap: 6px; }
+    .step-bar-inner { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+    .step-num { font-size: 0.52rem; color: var(--text-dim); text-align: center; }
 
     /* console */
     .console-section { margin-top: auto; }
@@ -342,10 +353,10 @@
       background: var(--bg-input);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 8px 12px;
-      font-size: 0.73rem;
-      line-height: 1.7;
-      height: 88px;
+      padding: 7px 10px;
+      font-size: 0.7rem;
+      line-height: 1.65;
+      height: 76px;
       overflow-y: auto;
       color: var(--text-dim);
     }
@@ -381,7 +392,7 @@
 <header>
   <div>
     <div class="logo">CODE<span>BEATS</span></div>
-    <div class="tagline">Syntax-to-Synth Lab · Phase 3</div>
+    <div class="tagline">Syntax-to-Synth Lab · Phase 4</div>
   </div>
   <div class="header-right">
     <a href="../index.html" class="back-link">← Hub</a>
@@ -398,18 +409,27 @@
       Code Input
     </div>
 
-    <textarea id="code-editor" spellcheck="false" placeholder="// Available commands:
+    <textarea id="code-editor" spellcheck="false" placeholder="// ── Synth & Melody ──────────────────────
+//   play(C4, 0.5)              → note + duration (s)
+//   synth(sine)                → sine|square|triangle|sawtooth
+//   bpm(120)                   → tempo 40–240
+//   volume(0.8)                → master vol 0.0–1.0
 //
-//   play(C4, 0.5)              → melody note + duration (s)
-//   bpm(120)                   → tempo: 40–240
-//   synth(sine)                → sine | square | triangle | sawtooth
-//   volume(0.8)                → master volume: 0.0–1.0
-//   loop(true)                 → loop beat: true | false
+// ── Envelope (ADSR) ──────────────────────
+//   attack(0.02)               → 0.001–2.0 s
+//   decay(0.1)                 → 0.001–2.0 s
+//   sustain(0.5)               → 0.0–1.0
+//   release(0.8)               → 0.001–4.0 s
 //
-//   // Drum commands (8-step arrays):
-//   kick([1,0,0,1,1,0,0,1])   → kick drum pattern
-//   snare([0,0,1,0,0,0,1,0])  → snare pattern
-//   hihat([1,1,1,1,1,1,1,1])  → hi-hat pattern
+// ── Effects ───────────────────────────────
+//   reverb(0.6)                → 0.0–1.0
+//   delay(0.3)                 → 0.0–1.0
+//
+// ── Drums ─────────────────────────────────
+//   kick([1,0,0,0,1,0,0,0])
+//   snare([0,0,1,0,0,0,1,0])
+//   hihat([1,1,1,1,1,1,1,1])
+//   loop(true)
 //
 // Press RUN to execute ↓"></textarea>
 
@@ -422,11 +442,12 @@
 
     <div class="preset-bar">
       <span>Presets:</span>
-      <button class="btn-preset" data-preset="basic">Basic Note</button>
-      <button class="btn-preset" data-preset="drums">Full Drums</button>
-      <button class="btn-preset" data-preset="melody">Melody</button>
+      <button class="btn-preset" data-preset="basic">Basic</button>
+      <button class="btn-preset" data-preset="dreamy">Dreamy</button>
+      <button class="btn-preset" data-preset="punchy">Punchy</button>
       <button class="btn-preset" data-preset="groove">Groove</button>
       <button class="btn-preset" data-preset="hiphop">Hip-Hop</button>
+      <button class="btn-preset" data-preset="ambient">Ambient</button>
     </div>
   </div>
 
@@ -445,7 +466,7 @@
         <canvas id="waveform-canvas"></canvas>
       </div>
 
-      <!-- Readouts -->
+      <!-- Readouts: row 1 — synth params -->
       <div class="readout-grid">
         <div class="readout-card">
           <div class="rc-label">Waveform</div>
@@ -473,17 +494,60 @@
         </div>
       </div>
 
+      <!-- ADSR Envelope Visualizer -->
+      <div>
+        <span class="section-label">Envelope (ADSR)</span>
+        <canvas id="adsr-canvas"></canvas>
+        <!-- ADSR readout row -->
+        <div class="readout-grid" style="margin-top:5px; grid-template-columns: repeat(4,1fr);">
+          <div class="readout-card">
+            <div class="rc-label">Attack</div>
+            <div class="rc-value" id="rd-attack">0.02</div>
+          </div>
+          <div class="readout-card">
+            <div class="rc-label">Decay</div>
+            <div class="rc-value yellow" id="rd-decay">0.10</div>
+          </div>
+          <div class="readout-card">
+            <div class="rc-label">Sustain</div>
+            <div class="rc-value green" id="rd-sustain">0.50</div>
+          </div>
+          <div class="readout-card">
+            <div class="rc-label">Release</div>
+            <div class="rc-value pink" id="rd-release">0.80</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Effects -->
+      <div>
+        <span class="section-label">Effects</span>
+        <div class="effects-row">
+          <div class="effect-card">
+            <div class="rc-label">Reverb</div>
+            <div class="rc-value purple" id="rd-reverb">0.00</div>
+            <div class="effect-bar-track">
+              <div class="effect-bar-fill reverb" id="bar-reverb" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="effect-card">
+            <div class="rc-label">Delay</div>
+            <div class="rc-value orange" id="rd-delay">0.00</div>
+            <div class="effect-bar-track">
+              <div class="effect-bar-fill delay" id="bar-delay" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Drum Sequencer -->
       <div>
         <span class="section-label">Drum Sequencer</span>
-
-        <!-- Step numbers -->
         <div class="step-bar">
           <div></div>
           <div class="step-bar-inner" id="step-numbers"></div>
         </div>
-
-        <div class="drum-sequencer" id="drum-sequencer">
+        <div class="drum-sequencer">
           <div class="drum-row kick-row"  data-instrument="kick">
             <div class="drum-label kick">Kick</div>
             <div class="drum-grid" id="grid-kick"></div>
@@ -503,7 +567,7 @@
       <div class="console-section">
         <span class="section-label">Console</span>
         <div id="console-log">
-          <span class="log-info">// Code Beats Phase 3 — Drum sequencer ready.</span><br>
+          <span class="log-info">// Code Beats Phase 4 — Envelope &amp; Effects ready.</span><br>
         </div>
       </div>
 
@@ -512,18 +576,17 @@
 </div>
 
 <footer>
-  <span>CODE BEATS — Phase 3 · Multi-Row Drum Sequencer</span>
+  <span>CODE BEATS — Phase 4 · Envelope &amp; Effects</span>
   <span>Tone.js v14 · GitHub Pages</span>
 </footer>
 
 
 <script>
 /* ════════════════════════════════════════════
-   CODE BEATS — Phase 3
-   Multi-row drum sequencer: kick, snare, hi-hat
-   Each row has its own synthesized sound,
-   8-step grid, and colour-coded UI.
-   All Phase 2 commands retained.
+   CODE BEATS — Phase 4
+   ADSR envelope commands + reverb/delay effects
+   Live ADSR curve visualizer
+   All Phase 2 & 3 commands retained
    ════════════════════════════════════════════ */
 
 // ── Presets ────────────────────────────────
@@ -532,31 +595,49 @@ const PRESETS = {
 synth(sine)
 bpm(120)
 volume(0.8)
+attack(0.02)
+decay(0.1)
+sustain(0.5)
+release(0.8)
 play(C4, 0.5)`,
 
-  drums: `// Full Drum Kit
-bpm(120)
-volume(0.8)
-kick([1,0,0,0,1,0,0,0])
-snare([0,0,1,0,0,0,1,0])
-hihat([1,1,1,1,1,1,1,1])
-loop(true)`,
+  dreamy: `// Dreamy Pad
+synth(sine)
+bpm(80)
+volume(0.7)
+attack(0.8)
+decay(0.4)
+sustain(0.7)
+release(2.0)
+reverb(0.8)
+delay(0.3)
+play(C4, 1.5)
+play(E4, 1.5)
+play(G4, 1.5)`,
 
-  melody: `// Melody + Hi-Hat
-synth(triangle)
-bpm(100)
+  punchy: `// Punchy Lead
+synth(square)
+bpm(140)
 volume(0.75)
-hihat([1,0,1,0,1,0,1,0])
-loop(true)
-play(C4, 0.3)
-play(E4, 0.3)
-play(G4, 0.3)
-play(C5, 0.6)`,
+attack(0.001)
+decay(0.05)
+sustain(0.3)
+release(0.1)
+reverb(0.1)
+play(C4, 0.2)
+play(E4, 0.2)
+play(G4, 0.2)
+play(C5, 0.4)`,
 
-  groove: `// Groove Pattern
+  groove: `// Groove
 synth(sine)
 bpm(95)
 volume(0.7)
+attack(0.02)
+decay(0.1)
+sustain(0.5)
+release(0.4)
+reverb(0.2)
 kick([1,0,0,1,0,0,1,0])
 snare([0,0,1,0,0,1,0,0])
 hihat([1,0,1,1,0,1,1,0])
@@ -566,10 +647,30 @@ loop(true)`,
 synth(sawtooth)
 bpm(85)
 volume(0.75)
+attack(0.001)
+decay(0.2)
+sustain(0.4)
+release(0.3)
+reverb(0.15)
+delay(0.2)
 kick([1,0,0,0,0,0,1,0])
 snare([0,0,0,1,0,0,0,1])
 hihat([1,1,0,1,1,1,0,1])
-loop(true)`
+loop(true)`,
+
+  ambient: `// Ambient Wash
+synth(triangle)
+bpm(60)
+volume(0.65)
+attack(1.5)
+decay(0.8)
+sustain(0.8)
+release(3.0)
+reverb(0.9)
+delay(0.5)
+play(C3, 3.0)
+play(G3, 3.0)
+play(E4, 3.0)`
 };
 
 // ── Constants ──────────────────────────────
@@ -579,16 +680,16 @@ const STEPS       = 8;
 
 // ── State ──────────────────────────────────
 const state = {
-  // audio nodes
   melodySynth: null,
   kickSynth:   null,
   snareSynth:  null,
   hihatSynth:  null,
   vol:         null,
   analyser:    null,
+  reverbFx:    null,
+  delayFx:     null,
   seqLoop:     null,
 
-  // params
   waveType:    'sine',
   bpm:         120,
   volume:      0.8,
@@ -596,7 +697,9 @@ const state = {
   isPlaying:   false,
   currentStep: -1,
 
-  // drum patterns
+  adsr: { attack: 0.02, decay: 0.1, sustain: 0.5, release: 0.8 },
+  fx:   { reverb: 0.0, delay: 0.0 },
+
   patterns: {
     kick:  new Array(STEPS).fill(0),
     snare: new Array(STEPS).fill(0),
@@ -605,21 +708,31 @@ const state = {
 };
 
 // ── DOM refs ───────────────────────────────
-const editor    = document.getElementById('code-editor');
-const btnRun    = document.getElementById('btn-run');
-const btnStop   = document.getElementById('btn-stop');
-const btnLoop   = document.getElementById('btn-loop');
-const btnClear  = document.getElementById('btn-clear');
-const statusEl  = document.getElementById('status');
-const rdWave    = document.getElementById('rd-wave');
-const rdBpm     = document.getElementById('rd-bpm');
-const rdVol     = document.getElementById('rd-vol');
-const rdNote    = document.getElementById('rd-note');
-const rdDur     = document.getElementById('rd-dur');
-const rdLoop    = document.getElementById('rd-loop');
-const consoleEl = document.getElementById('console-log');
-const canvas    = document.getElementById('waveform-canvas');
-const ctx2d     = canvas.getContext('2d');
+const editor      = document.getElementById('code-editor');
+const btnRun      = document.getElementById('btn-run');
+const btnStop     = document.getElementById('btn-stop');
+const btnLoop     = document.getElementById('btn-loop');
+const btnClear    = document.getElementById('btn-clear');
+const statusEl    = document.getElementById('status');
+const rdWave      = document.getElementById('rd-wave');
+const rdBpm       = document.getElementById('rd-bpm');
+const rdVol       = document.getElementById('rd-vol');
+const rdNote      = document.getElementById('rd-note');
+const rdDur       = document.getElementById('rd-dur');
+const rdLoop      = document.getElementById('rd-loop');
+const rdAttack    = document.getElementById('rd-attack');
+const rdDecay     = document.getElementById('rd-decay');
+const rdSustain   = document.getElementById('rd-sustain');
+const rdRelease   = document.getElementById('rd-release');
+const rdReverb    = document.getElementById('rd-reverb');
+const rdDelay     = document.getElementById('rd-delay');
+const barReverb   = document.getElementById('bar-reverb');
+const barDelay    = document.getElementById('bar-delay');
+const consoleEl   = document.getElementById('console-log');
+const canvas      = document.getElementById('waveform-canvas');
+const ctx2d       = canvas.getContext('2d');
+const adsrCanvas  = document.getElementById('adsr-canvas');
+const adsrCtx     = adsrCanvas.getContext('2d');
 
 // ── Console ────────────────────────────────
 function log(msg, type = 'info') {
@@ -630,13 +743,65 @@ function log(msg, type = 'info') {
   consoleEl.appendChild(document.createElement('br'));
   consoleEl.scrollTop = consoleEl.scrollHeight;
 }
-
 function setStatus(label, cls) {
   statusEl.textContent = label;
   statusEl.className = `status-pill ${cls}`;
 }
 
-// ── Build step number bar ──────────────────
+// ── ADSR Visualizer ────────────────────────
+function resizeADSR() {
+  adsrCanvas.width  = adsrCanvas.offsetWidth;
+  adsrCanvas.height = adsrCanvas.offsetHeight;
+}
+resizeADSR();
+window.addEventListener('resize', resizeADSR);
+
+function drawADSR() {
+  resizeADSR();
+  const W = adsrCanvas.width, H = adsrCanvas.height;
+  const { attack, decay, sustain, release } = state.adsr;
+  adsrCtx.clearRect(0, 0, W, H);
+
+  // Normalize segments to available width
+  const total  = attack + decay + 0.3 + release; // 0.3 = sustain hold time (fixed visual)
+  const aW = (attack  / total) * W;
+  const dW = (decay   / total) * W;
+  const sW = (0.3     / total) * W;
+  const rW = (release / total) * W;
+  const pad = 6;
+  const top = pad, bot = H - pad;
+
+  adsrCtx.beginPath();
+  adsrCtx.strokeStyle = '#00ffe7';
+  adsrCtx.lineWidth   = 1.5;
+  adsrCtx.shadowColor = '#00ffe7';
+  adsrCtx.shadowBlur  = 4;
+
+  // Start → Attack peak
+  adsrCtx.moveTo(0, bot);
+  adsrCtx.lineTo(aW, top);
+  // Attack → Decay to sustain level
+  const susY = top + (1 - sustain) * (bot - top);
+  adsrCtx.lineTo(aW + dW, susY);
+  // Sustain hold
+  adsrCtx.lineTo(aW + dW + sW, susY);
+  // Release → zero
+  adsrCtx.lineTo(aW + dW + sW + rW, bot);
+
+  adsrCtx.stroke();
+
+  // Fill under curve
+  adsrCtx.lineTo(0, bot);
+  adsrCtx.closePath();
+  const grad = adsrCtx.createLinearGradient(0, top, 0, bot);
+  grad.addColorStop(0, 'rgba(0,255,231,0.15)');
+  grad.addColorStop(1, 'rgba(0,255,231,0.01)');
+  adsrCtx.fillStyle = grad;
+  adsrCtx.fill();
+}
+drawADSR();
+
+// ── Step numbers ───────────────────────────
 function buildStepNumbers() {
   const bar = document.getElementById('step-numbers');
   bar.innerHTML = '';
@@ -649,7 +814,7 @@ function buildStepNumbers() {
 }
 buildStepNumbers();
 
-// ── Build a drum grid row ──────────────────
+// ── Drum grids ─────────────────────────────
 function buildDrumGrid(instrument) {
   const grid = document.getElementById(`grid-${instrument}`);
   grid.innerHTML = '';
@@ -657,18 +822,13 @@ function buildDrumGrid(instrument) {
     const cell = document.createElement('div');
     cell.className = 'drum-cell' + (on ? ' on' : '');
     cell.dataset.step = i;
-    cell.dataset.instrument = instrument;
-
-    // Click to toggle cell manually
     cell.addEventListener('click', () => {
       state.patterns[instrument][i] ^= 1;
       cell.classList.toggle('on', state.patterns[instrument][i] === 1);
     });
-
     grid.appendChild(cell);
   });
 }
-
 function buildAllGrids() {
   buildDrumGrid('kick');
   buildDrumGrid('snare');
@@ -676,11 +836,9 @@ function buildAllGrids() {
 }
 buildAllGrids();
 
-// ── Highlight current playback step ────────
 function highlightStep(step) {
   ['kick', 'snare', 'hihat'].forEach(inst => {
-    const cells = document.querySelectorAll(`#grid-${inst} .drum-cell`);
-    cells.forEach((c, i) => {
+    document.querySelectorAll(`#grid-${inst} .drum-cell`).forEach((c, i) => {
       c.classList.toggle('active', i === step);
     });
   });
@@ -694,36 +852,35 @@ async function initAudio() {
   state.analyser = new Tone.Analyser('waveform', 256);
   state.vol      = new Tone.Volume(Tone.gainToDb(state.volume));
 
-  // Melody synth
+  // Effects chain
+  state.reverbFx = new Tone.Reverb({ decay: 3, wet: state.fx.reverb });
+  state.delayFx  = new Tone.FeedbackDelay({ delayTime: '8n', feedback: 0.3, wet: state.fx.delay });
+  await state.reverbFx.generate();
+
+  // Melody synth → delay → reverb → vol → analyser → out
   state.melodySynth = new Tone.Synth({
     oscillator: { type: state.waveType },
-    envelope:   { attack: 0.02, decay: 0.1, sustain: 0.5, release: 0.5 },
-  }).chain(state.vol, state.analyser, Tone.getDestination());
+    envelope:   { ...state.adsr },
+  }).chain(state.delayFx, state.reverbFx, state.vol, state.analyser, Tone.getDestination());
 
-  // Kick: low sine with pitch drop
+  // Drums → vol → out (no melody effects on drums)
   state.kickSynth = new Tone.MembraneSynth({
-    pitchDecay:  0.05,
-    octaves:     8,
-    envelope:    { attack: 0.001, decay: 0.3, sustain: 0, release: 0.1 },
+    pitchDecay: 0.05, octaves: 8,
+    envelope: { attack: 0.001, decay: 0.3, sustain: 0, release: 0.1 },
   }).chain(state.vol, Tone.getDestination());
 
-  // Snare: noise burst
   state.snareSynth = new Tone.NoiseSynth({
-    noise:    { type: 'white' },
+    noise: { type: 'white' },
     envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.05 },
   }).chain(state.vol, Tone.getDestination());
 
-  // Hi-hat: metallic noise, very short
   state.hihatSynth = new Tone.MetalSynth({
-    frequency:  400,
-    envelope:   { attack: 0.001, decay: 0.05, release: 0.01 },
-    harmonicity: 5.1,
-    modulationIndex: 32,
-    resonance:  4000,
-    octaves:    1.5,
+    frequency: 400, harmonicity: 5.1, modulationIndex: 32,
+    resonance: 4000, octaves: 1.5,
+    envelope: { attack: 0.001, decay: 0.05, release: 0.01 },
   }).chain(state.vol, Tone.getDestination());
 
-  log('// Audio context started. Drum kit ready.', 'ok');
+  log('// Audio context started. Drum kit + FX ready.', 'ok');
   setStatus('● READY', 'ready');
   startOscilloscope();
 }
@@ -756,7 +913,7 @@ function startOscilloscope() {
   draw();
 }
 
-// ── Drum Sequencer ─────────────────────────
+// ── Drum loop ──────────────────────────────
 function startDrumLoop() {
   stopDrumLoop();
   Tone.getTransport().bpm.value = state.bpm;
@@ -764,28 +921,11 @@ function startDrumLoop() {
 
   state.seqLoop = new Tone.Sequence((time) => {
     state.currentStep = step;
+    Tone.getDraw().schedule(() => { highlightStep(step); }, time);
 
-    // Schedule UI highlight slightly after audio time
-    Tone.getDraw().schedule(() => {
-      highlightStep(step);
-    }, time);
-
-    const k = state.patterns.kick[step];
-    const s = state.patterns.snare[step];
-    const h = state.patterns.hihat[step];
-
-    if (k) {
-      state.kickSynth.triggerAttackRelease('C1', '8n', time);
-      state.isPlaying = true;
-    }
-    if (s) {
-      state.snareSynth.triggerAttackRelease('8n', time);
-      state.isPlaying = true;
-    }
-    if (h) {
-      state.hihatSynth.triggerAttackRelease('32n', time);
-      state.isPlaying = true;
-    }
+    if (state.patterns.kick[step])  { state.kickSynth.triggerAttackRelease('C1', '8n', time); state.isPlaying = true; }
+    if (state.patterns.snare[step]) { state.snareSynth.triggerAttackRelease('8n', time); state.isPlaying = true; }
+    if (state.patterns.hihat[step]) { state.hihatSynth.triggerAttackRelease('32n', time); state.isPlaying = true; }
 
     step = (step + 1) % STEPS;
   }, [...Array(STEPS).keys()], '8n');
@@ -797,186 +937,195 @@ function startDrumLoop() {
 }
 
 function stopDrumLoop() {
-  if (state.seqLoop) {
-    state.seqLoop.stop();
-    state.seqLoop.dispose();
-    state.seqLoop = null;
-  }
+  if (state.seqLoop) { state.seqLoop.stop(); state.seqLoop.dispose(); state.seqLoop = null; }
   Tone.getTransport().stop();
   highlightStep(-1);
   state.isPlaying   = false;
   state.currentStep = -1;
 }
 
+// ── Apply ADSR to synth ────────────────────
+function applyEnvelope() {
+  if (!state.melodySynth) return;
+  const { attack, decay, sustain, release } = state.adsr;
+  state.melodySynth.envelope.attack  = attack;
+  state.melodySynth.envelope.decay   = decay;
+  state.melodySynth.envelope.sustain = sustain;
+  state.melodySynth.envelope.release = release;
+}
+
 // ══════════════════════════════════════════
-//   COMMAND PARSER (Phase 2 + Phase 3)
+//   COMMAND PARSER — Phase 2 + 3 + 4
 // ══════════════════════════════════════════
 function executeCode(code) {
   const rawLines = code.split('\n');
   const commands = [];
-
   rawLines.forEach((raw, idx) => {
-    const trimmed = raw.trim();
-    if (trimmed && !trimmed.startsWith('//')) {
-      commands.push({ text: trimmed, lineNum: idx + 1 });
-    }
+    const t = raw.trim();
+    if (t && !t.startsWith('//')) commands.push({ text: t, lineNum: idx + 1 });
   });
 
-  if (commands.length === 0) {
-    log('// No executable commands found.', 'err');
-    return;
-  }
-
+  if (commands.length === 0) { log('// No executable commands found.', 'err'); return; }
   log(`// Executing ${commands.length} command(s)...`, 'info');
 
   const melodyNotes = [];
-  let drumPatternSet = false;
 
   commands.forEach(({ text: line, lineNum }) => {
 
-    // ── play(note, duration) ──────────────
+    // play(note, dur)
     const playMatch = line.match(/^play\(\s*([A-Ga-g][#b]?\d)\s*,\s*([\d.]+)\s*\)$/i);
     if (playMatch) {
       const note = playMatch[1].toUpperCase();
       const dur  = parseFloat(playMatch[2]);
-      if (!VALID_NOTES.test(note)) {
-        log(`// Line ${lineNum} error: invalid note "${note}". Use format C4, D#3, Bb2.`, 'err');
-        return;
-      }
-      if (isNaN(dur) || dur <= 0 || dur > 8) {
-        log(`// Line ${lineNum} error: duration must be 0.1–8 seconds.`, 'err');
-        return;
-      }
-      melodyNotes.push({ note, dur });
-      return;
+      if (!VALID_NOTES.test(note)) { log(`// Line ${lineNum}: invalid note "${note}".`, 'err'); return; }
+      if (isNaN(dur) || dur <= 0 || dur > 8) { log(`// Line ${lineNum}: duration must be 0.1–8 s.`, 'err'); return; }
+      melodyNotes.push({ note, dur }); return;
     }
 
-    // ── bpm(value) ────────────────────────
+    // bpm(val)
     const bpmMatch = line.match(/^bpm\(\s*(\d+)\s*\)$/i);
     if (bpmMatch) {
       const val = parseInt(bpmMatch[1]);
-      if (val < 40 || val > 240) {
-        log(`// Line ${lineNum} error: bpm must be 40–240. Got ${val}.`, 'err');
-        return;
-      }
-      state.bpm = val;
-      Tone.getTransport().bpm.value = val;
-      rdBpm.textContent = val;
-      log(`// bpm → ${val}`, 'ok');
-      return;
+      if (val < 40 || val > 240) { log(`// Line ${lineNum}: bpm must be 40–240.`, 'err'); return; }
+      state.bpm = val; Tone.getTransport().bpm.value = val; rdBpm.textContent = val;
+      log(`// bpm → ${val}`, 'ok'); return;
     }
 
-    // ── synth(waveform) ───────────────────
+    // synth(wave)
     const synthMatch = line.match(/^synth\(\s*(\w+)\s*\)$/i);
     if (synthMatch) {
       const wave = synthMatch[1].toLowerCase();
-      if (!VALID_WAVES.includes(wave)) {
-        log(`// Line ${lineNum} error: unknown waveform "${wave}". Use: ${VALID_WAVES.join(', ')}.`, 'err');
-        return;
-      }
+      if (!VALID_WAVES.includes(wave)) { log(`// Line ${lineNum}: unknown waveform "${wave}".`, 'err'); return; }
       state.waveType = wave;
       if (state.melodySynth) state.melodySynth.oscillator.type = wave;
       rdWave.textContent = wave.toUpperCase();
-      log(`// synth → ${wave}`, 'ok');
-      return;
+      log(`// synth → ${wave}`, 'ok'); return;
     }
 
-    // ── volume(value) ─────────────────────
+    // volume(val)
     const volMatch = line.match(/^volume\(\s*([\d.]+)\s*\)$/i);
     if (volMatch) {
       const val = parseFloat(volMatch[1]);
-      if (isNaN(val) || val < 0 || val > 1) {
-        log(`// Line ${lineNum} error: volume must be 0.0–1.0. Got ${val}.`, 'err');
-        return;
-      }
+      if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: volume must be 0.0–1.0.`, 'err'); return; }
       state.volume = val;
       if (state.vol) state.vol.volume.value = Tone.gainToDb(val);
       rdVol.textContent = val.toFixed(2);
-      log(`// volume → ${val.toFixed(2)}`, 'ok');
-      return;
+      log(`// volume → ${val.toFixed(2)}`, 'ok'); return;
     }
 
-    // ── loop(true|false) ──────────────────
+    // loop(bool)
     const loopMatch = line.match(/^loop\(\s*(true|false)\s*\)$/i);
     if (loopMatch) {
       const val = loopMatch[1].toLowerCase() === 'true';
-      state.loopEnabled = val;
-      rdLoop.textContent = val ? 'ON' : 'OFF';
+      state.loopEnabled = val; rdLoop.textContent = val ? 'ON' : 'OFF';
       btnLoop.classList.toggle('active', val);
-      log(`// loop → ${val}`, 'ok');
-      return;
+      log(`// loop → ${val}`, 'ok'); return;
     }
 
-    // ── kick([...]) ───────────────────────
+    // ── ADSR ──────────────────────────────
+
+    // attack(val)
+    const atkMatch = line.match(/^attack\(\s*([\d.]+)\s*\)$/i);
+    if (atkMatch) {
+      const val = parseFloat(atkMatch[1]);
+      if (isNaN(val) || val < 0.001 || val > 2) { log(`// Line ${lineNum}: attack must be 0.001–2.0 s.`, 'err'); return; }
+      state.adsr.attack = val; applyEnvelope();
+      rdAttack.textContent = val.toFixed(3); drawADSR();
+      log(`// attack → ${val.toFixed(3)}`, 'ok'); return;
+    }
+
+    // decay(val)
+    const decMatch = line.match(/^decay\(\s*([\d.]+)\s*\)$/i);
+    if (decMatch) {
+      const val = parseFloat(decMatch[1]);
+      if (isNaN(val) || val < 0.001 || val > 2) { log(`// Line ${lineNum}: decay must be 0.001–2.0 s.`, 'err'); return; }
+      state.adsr.decay = val; applyEnvelope();
+      rdDecay.textContent = val.toFixed(3); drawADSR();
+      log(`// decay → ${val.toFixed(3)}`, 'ok'); return;
+    }
+
+    // sustain(val)
+    const susMatch = line.match(/^sustain\(\s*([\d.]+)\s*\)$/i);
+    if (susMatch) {
+      const val = parseFloat(susMatch[1]);
+      if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: sustain must be 0.0–1.0.`, 'err'); return; }
+      state.adsr.sustain = val; applyEnvelope();
+      rdSustain.textContent = val.toFixed(2); drawADSR();
+      log(`// sustain → ${val.toFixed(2)}`, 'ok'); return;
+    }
+
+    // release(val)
+    const relMatch = line.match(/^release\(\s*([\d.]+)\s*\)$/i);
+    if (relMatch) {
+      const val = parseFloat(relMatch[1]);
+      if (isNaN(val) || val < 0.001 || val > 4) { log(`// Line ${lineNum}: release must be 0.001–4.0 s.`, 'err'); return; }
+      state.adsr.release = val; applyEnvelope();
+      rdRelease.textContent = val.toFixed(3); drawADSR();
+      log(`// release → ${val.toFixed(3)}`, 'ok'); return;
+    }
+
+    // ── EFFECTS ───────────────────────────
+
+    // reverb(val)
+    const revMatch = line.match(/^reverb\(\s*([\d.]+)\s*\)$/i);
+    if (revMatch) {
+      const val = parseFloat(revMatch[1]);
+      if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: reverb must be 0.0–1.0.`, 'err'); return; }
+      state.fx.reverb = val;
+      if (state.reverbFx) state.reverbFx.wet.value = val;
+      rdReverb.textContent = val.toFixed(2);
+      barReverb.style.width = `${val * 100}%`;
+      log(`// reverb → ${val.toFixed(2)}`, 'ok'); return;
+    }
+
+    // delay(val)
+    const delMatch = line.match(/^delay\(\s*([\d.]+)\s*\)$/i);
+    if (delMatch) {
+      const val = parseFloat(delMatch[1]);
+      if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: delay must be 0.0–1.0.`, 'err'); return; }
+      state.fx.delay = val;
+      if (state.delayFx) state.delayFx.wet.value = val;
+      rdDelay.textContent = val.toFixed(2);
+      barDelay.style.width = `${val * 100}%`;
+      log(`// delay → ${val.toFixed(2)}`, 'ok'); return;
+    }
+
+    // ── DRUMS ─────────────────────────────
+
     const kickMatch = line.match(/^kick\(\s*\[([0-9,\s]+)\]\s*\)$/i);
     if (kickMatch) {
       const parsed = parseDrumPattern(kickMatch[1], 'kick', lineNum);
-      if (parsed) {
-        state.patterns.kick = parsed;
-        buildDrumGrid('kick');
-        drumPatternSet = true;
-        log(`// kick → [${parsed.join(',')}]`, 'ok');
-      }
-      return;
+      if (parsed) { state.patterns.kick = parsed; buildDrumGrid('kick'); log(`// kick → [${parsed.join(',')}]`, 'ok'); } return;
     }
 
-    // ── snare([...]) ──────────────────────
     const snareMatch = line.match(/^snare\(\s*\[([0-9,\s]+)\]\s*\)$/i);
     if (snareMatch) {
       const parsed = parseDrumPattern(snareMatch[1], 'snare', lineNum);
-      if (parsed) {
-        state.patterns.snare = parsed;
-        buildDrumGrid('snare');
-        drumPatternSet = true;
-        log(`// snare → [${parsed.join(',')}]`, 'ok');
-      }
-      return;
+      if (parsed) { state.patterns.snare = parsed; buildDrumGrid('snare'); log(`// snare → [${parsed.join(',')}]`, 'ok'); } return;
     }
 
-    // ── hihat([...]) ──────────────────────
     const hihatMatch = line.match(/^hihat\(\s*\[([0-9,\s]+)\]\s*\)$/i);
     if (hihatMatch) {
       const parsed = parseDrumPattern(hihatMatch[1], 'hihat', lineNum);
-      if (parsed) {
-        state.patterns.hihat = parsed;
-        buildDrumGrid('hihat');
-        drumPatternSet = true;
-        log(`// hihat → [${parsed.join(',')}]`, 'ok');
-      }
-      return;
+      if (parsed) { state.patterns.hihat = parsed; buildDrumGrid('hihat'); log(`// hihat → [${parsed.join(',')}]`, 'ok'); } return;
     }
 
-    // ── Unknown ───────────────────────────
-    log(`// Line ${lineNum} error: unknown command → "${line}"`, 'err');
+    log(`// Line ${lineNum}: unknown command → "${line}"`, 'err');
   });
 
-  // Play melody notes sequentially
-  if (melodyNotes.length > 0) {
-    playMelody(melodyNotes);
-  }
+  if (melodyNotes.length > 0) playMelody(melodyNotes);
 
-  // Start drum loop if loop enabled and any pattern has notes
   const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1));
-  if (state.loopEnabled && hasPattern) {
-    startDrumLoop();
-  }
+  if (state.loopEnabled && hasPattern) startDrumLoop();
 }
 
-// ── Drum pattern validator ─────────────────
 function parseDrumPattern(raw, name, lineNum) {
   const arr = raw.split(',').map(n => parseInt(n.trim()));
-  if (arr.length !== STEPS) {
-    log(`// Line ${lineNum} error: ${name} pattern must have exactly ${STEPS} values. Got ${arr.length}.`, 'err');
-    return null;
-  }
-  if (arr.some(v => v !== 0 && v !== 1)) {
-    log(`// Line ${lineNum} error: ${name} values must be 0 or 1.`, 'err');
-    return null;
-  }
+  if (arr.length !== STEPS) { log(`// Line ${lineNum}: ${name} needs exactly ${STEPS} values. Got ${arr.length}.`, 'err'); return null; }
+  if (arr.some(v => v !== 0 && v !== 1)) { log(`// Line ${lineNum}: ${name} values must be 0 or 1.`, 'err'); return null; }
   return arr;
 }
 
-// ── Sequential melody playback ─────────────
 function playMelody(notes) {
   if (!state.melodySynth) return;
   let delay = 0;
@@ -997,7 +1146,7 @@ function playMelody(notes) {
   });
 }
 
-// ── Button: RUN ────────────────────────────
+// ── Buttons ────────────────────────────────
 btnRun.addEventListener('click', async () => {
   await initAudio();
   stopDrumLoop();
@@ -1006,7 +1155,6 @@ btnRun.addEventListener('click', async () => {
   executeCode(code);
 });
 
-// ── Button: STOP ───────────────────────────
 btnStop.addEventListener('click', () => {
   stopDrumLoop();
   if (state.melodySynth) state.melodySynth.triggerRelease();
@@ -1017,13 +1165,11 @@ btnStop.addEventListener('click', () => {
   log('// Stopped.', 'info');
 });
 
-// ── Button: LOOP TOGGLE ────────────────────
 btnLoop.addEventListener('click', async () => {
   await initAudio();
   state.loopEnabled = !state.loopEnabled;
   btnLoop.classList.toggle('active', state.loopEnabled);
   rdLoop.textContent = state.loopEnabled ? 'ON' : 'OFF';
-
   const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1));
   if (state.loopEnabled && hasPattern) {
     startDrumLoop();
@@ -1034,21 +1180,12 @@ btnLoop.addEventListener('click', async () => {
   }
 });
 
-// ── Button: CLEAR ──────────────────────────
-btnClear.addEventListener('click', () => {
-  editor.value = '';
-  editor.focus();
-});
+btnClear.addEventListener('click', () => { editor.value = ''; editor.focus(); });
 
-// ── Presets ────────────────────────────────
 document.querySelectorAll('.btn-preset').forEach(btn => {
   btn.addEventListener('click', () => {
     const key = btn.dataset.preset;
-    if (PRESETS[key]) {
-      editor.value = PRESETS[key];
-      editor.focus();
-      log(`// Preset loaded: ${key}`, 'info');
-    }
+    if (PRESETS[key]) { editor.value = PRESETS[key]; editor.focus(); log(`// Preset loaded: ${key}`, 'info'); }
   });
 });
 </script>
