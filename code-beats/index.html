@@ -1125,7 +1125,7 @@ function executeCode(code) {
 
   state.melodyNotes = melodyNotes;
   if (!state.melodyLoop && melodyNotes.length > 0) playMelody(melodyNotes);
-  const hasPattern = object.values(state.patterns).some(p => p.some(v => v === 1));
+  const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1));
   if (state.loopEnabled && hasPattern) startDrumLoop();
 }
 
@@ -1159,9 +1159,9 @@ function playMelody(notes) {
 // ── Buttons ────────────────────────────────
 btnRun.addEventListener('click', async () => {
   await initAudio();
-  stopDrumLoop();
   const code = cmEditor.getValue();
   if (!code.trim()) { log('// Editor is empty.', 'err'); return; }
+  stopDrumLoop();
   executeCode(code);
 });
 
