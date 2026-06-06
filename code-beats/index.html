@@ -784,7 +784,8 @@ const STEPS       = 8;
 
 // ── State ──────────────────────────────────
 const state = {
-  melodySynth: null, kickSynth: null, snareSynth: null, hihatSynth: null,
+  melodySynth: null, melodyLoop: false, melodyNotes: [], 
+  kickSynth: null, snareSynth: null, hihatSynth: null,
   vol: null, analyser: null, reverbFx: null, delayFx: null, seqLoop: null,
   waveType: 'sine', bpm: 120, volume: 0.8,
   loopEnabled: false, isPlaying: false, currentStep: -1,
@@ -981,6 +982,19 @@ function startDrumLoop() {
     if (state.patterns.kick[step])  { state.kickSynth.triggerAttackRelease('C1', '8n', time); state.isPlaying = true; }
     if (state.patterns.snare[step]) { state.snareSynth.triggerAttackRelease('8n', time); state.isPlaying = true; }
     if (state.patterns.hihat[step]) { state.hihatSynth.triggerAttackRelease('32n', time); state.isPlaying = true; }
+    if (state.melodyLoop && state.melodyNotes.length > 0) {
+      const noteCount = state.melodyNotes.length;
+      const noteStep = Math.floor(STEPS / noteCount);
+      state.melodyNotes.forEach((n, idx) => {
+        if (step === idx * noteStep) {
+          state.melodySynth.triggerAttackRelease(n.note, n.dur, time);
+          Tone.getDraw().schedule(() => {
+            rdNote.textContent = n.note;
+            rdDur.textContent = `${n.dur}s`;
+          }, time);
+        }
+      });
+    }
     step = (step + 1) % STEPS;
   }, [...Array(STEPS).keys()], '8n');
   state.seqLoop.start(0);
@@ -1054,6 +1068,10 @@ function executeCode(code) {
       btnLoop.classList.toggle('active', val);
       log(`// loop → ${val}`, 'ok'); return;
     }
+    if ((m = line.match(/^melody_loop\(\s*(true|false)\s*\)$/i))) {
+      state.melodyLoop = m[1].toLowerCase() === 'true';
+      log(`// melody_loop → ${state.melodyLoop}`, 'ok'); return;
+    }
     if ((m = line.match(/^attack\(\s*([\d.]+)\s*\)$/i))) {
       const val = parseFloat(m[1]);
       if (isNaN(val) || val < 0.001 || val > 2) { log(`// Line ${lineNum}: attack must be 0.001–2.0 s.`, 'err'); return; }
@@ -1105,8 +1123,9 @@ function executeCode(code) {
     log(`// Line ${lineNum}: unknown command → "${line}"`, 'err');
   });
 
-  if (melodyNotes.length > 0) playMelody(melodyNotes);
-  const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1));
+  state.melodyNotes = melodyNotes;
+  if (!state.melodyLoop && melodyNotes.length > 0) playMelody(melodyNotes);
+  const hasPattern = object.values(state.patterns).some(p => p.some(v => v === 1));
   if (state.loopEnabled && hasPattern) startDrumLoop();
 }
 
