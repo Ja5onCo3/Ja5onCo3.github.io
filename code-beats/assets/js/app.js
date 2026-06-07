@@ -1083,7 +1083,7 @@ if (preloadMatches) {
 
   state.melodyNotes = melodyNotes;
   if (!state.melodyLoop && melodyNotes.length > 0) playMelody(melodyNotes);
-  const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1));
+  const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1))
 	         || state.bassPattern.some(n => n !== '0')
 					 || Object.values(state.percPatterns).some(p => p.some(v => v === 1));
 	if (state.loopEnabled && hasPattern) startDrumLoop();
