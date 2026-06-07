@@ -1081,12 +1081,10 @@ if (preloadMatches) {
     log(`// Line ${lineNum}: unknown command → "${line}"`, 'err');
   });
 
-  state.melodyNotes = melodyNotes;
+	state.melodyNotes = melodyNotes;
   if (!state.melodyLoop && melodyNotes.length > 0) playMelody(melodyNotes);
-  const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1))
-	         || state.bassPattern.some(n => n !== '0')
-					 || Object.values(state.percPatterns).some(p => p.some(v => v === 1));
-	if (state.loopEnabled && hasPattern) startDrumLoop();
+  const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1)) || state.bassPattern.some(n => n !== '0') || Object.values(state.percPatterns).some(p => p.some(v => v === 1));
+  if (state.loopEnabled && hasPattern) startDrumLoop();
 }
 
 function parseDrum(raw, name, lineNum) {
