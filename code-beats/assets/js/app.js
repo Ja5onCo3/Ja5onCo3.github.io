@@ -120,6 +120,81 @@ const VALID_NOTES = /^[A-Ga-g][#b]?\d$/;
 const VALID_WAVES = ['sine', 'square', 'triangle', 'sawtooth'];
 const STEPS       = 8;
 
+// Instrument definitions
+const INSTRUMENT_TYPES = {
+  piano:         'sampler',
+  electricpiano: 'sampler',
+  violin:        'sampler',
+	guitaracoustic:'sampler',
+  pluckedbass:   'sampler',
+  electriccello: 'sampler',
+  organ:         'synth',
+  warmpad:       'synth',
+  atmosphere:    'synth',
+  clavicylinder: 'synth',
+};
+
+const SAMPLER_URLS = {
+  piano: {
+    baseUrl: 'https://tonejs.github.io/audio/salamander/',
+    urls: {
+      'A0':'A0.mp3','C1':'C1.mp3','D#1':'Ds1.mp3','F#1':'Fs1.mp3',
+      'A1':'A1.mp3','C2':'C2.mp3','D#2':'Ds2.mp3','F#2':'Fs2.mp3',
+      'A2':'A2.mp3','C3':'C3.mp3','D#3':'Ds3.mp3','F#3':'Fs3.mp3',
+      'A3':'A3.mp3','C4':'C4.mp3','D#4':'Ds4.mp3','F#4':'Fs4.mp3',
+      'A4':'A4.mp3','C5':'C5.mp3','D#5':'Ds5.mp3','F#5':'Fs5.mp3',
+      'A5':'A5.mp3','C6':'C6.mp3','D#6':'Ds6.mp3','F#6':'Fs6.mp3',
+      'A7':'A7.mp3','C8':'C8.mp3',
+    }
+  },
+  electricpiano: {
+    baseUrl: 'https://nbrosowsky.github.io/tonejs-instruments/samples/electric-piano/',
+    urls: {
+      'A2':'A2.mp3','A3':'A3.mp3','A4':'A4.mp3','A5':'A5.mp3',
+      'C2':'C2.mp3','C3':'C3.mp3','C4':'C4.mp3','C5':'C5.mp3',
+      'D#2':'Ds2.mp3','D#3':'Ds3.mp3','D#4':'Ds4.mp3','D#5':'Ds5.mp3',
+      'F#2':'Fs2.mp3','F#3':'Fs3.mp3','F#4':'Fs4.mp3','F#5':'Fs5.mp3',
+    }
+  },
+	violin: {
+  baseUrl: 'https://nbrosowsky.github.io/tonejs-instruments/samples/violin/',
+  urls: {
+    'A3':'A3.mp3','A4':'A4.mp3','A5':'A5.mp3',
+    'C4':'C4.mp3','C5':'C5.mp3','C6':'C6.mp3',
+    'E4':'E4.mp3','E5':'E5.mp3',
+    'G3':'G3.mp3','G4':'G4.mp3','G5':'G5.mp3',
+	  }
+	},
+	guitaracoustic: {
+  	baseUrl: 'https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-acoustic/',
+  	urls: {
+    	'A2':'A2.mp3','A3':'A3.mp3','A4':'A4.mp3',
+	    'C3':'C3.mp3','C4':'C4.mp3','C5':'C5.mp3',
+	    'E2':'E2.mp3','E3':'E3.mp3','E4':'E4.mp3',
+	    'G2':'G2.mp3','G3':'G3.mp3','G4':'G4.mp3',
+	  }
+	},
+  pluckedbass: {
+    baseUrl: 'https://nbrosowsky.github.io/tonejs-instruments/samples/bass-electric/',
+    urls: {
+      'A1':'A1.mp3','A2':'A2.mp3','A3':'A3.mp3','A4':'A4.mp3',
+      'C2':'C2.mp3','C3':'C3.mp3','C4':'C4.mp3',
+      'D#2':'Ds2.mp3','D#3':'Ds3.mp3','D#4':'Ds4.mp3',
+      'F#2':'Fs2.mp3','F#3':'Fs3.mp3','F#4':'Fs4.mp3',
+      'G2':'G2.mp3','G3':'G3.mp3','G4':'G4.mp3',
+    }
+  },
+  electriccello: {
+    baseUrl: 'https://nbrosowsky.github.io/tonejs-instruments/samples/cello/',
+    urls: {
+      'A2':'A2.mp3','A3':'A3.mp3','A4':'A4.mp3',
+      'C2':'C2.mp3','C3':'C3.mp3','C4':'C4.mp3',
+      'D#2':'Ds2.mp3','D#3':'Ds3.mp3','D#4':'Ds4.mp3',
+      'G2':'G2.mp3','G3':'G3.mp3','G4':'G4.mp3',
+    }
+  },
+};
+
 // ── State ──────────────────────────────────
 const state = {
   melodySynth: null, melodyLoop: false, melodyNotes: [],
@@ -150,7 +225,19 @@ const state = {
   percPatterns:   { djembe: new Array(STEPS).fill(0), tabla: new Array(STEPS).fill(0), darbuka: new Array(STEPS).fill(0), talking: new Array(STEPS).fill(0), dunun: new Array(STEPS).fill(0), cajon: new Array(STEPS).fill(0), conga: new Array(STEPS).fill(0), taiko: new Array(STEPS).fill(0), dhol: new Array(STEPS).fill(0), framedrum: new Array(STEPS).fill(0) },
   percSynths:     {},
 
+  // Melodic instruments
+activeInstrument:    'piano',
+melodicVolumes: {
+  piano: 0.8, electricpiano: 0.8, organ: 0.8,
+  warmpad: 0.8, atmosphere: 0.8, clavicylinder: 0.8,
+  pluckedbass: 0.8, electriccello: 0.8,
+  violin: 0.8, guitaracoustic: 0.8,
+},
+melodicSynths:       {},
+melodicLoaded:       {},
+
 };
+
 
 // ── DOM refs ───────────────────────────────
 const btnRun          = document.getElementById('btn-run');
@@ -197,6 +284,15 @@ const rdPercVol       = document.getElementById('rd-drum-vol');
 const percSeqGrid     = document.getElementById('perc-seq-grid');
 const percStepNumbers = document.getElementById('perc-step-numbers');
 const activePatternEl = document.getElementById('active-patterns');
+const btnMelodic          = document.getElementById('btn-melodic');
+const melodicOverlay      = document.getElementById('melodic-overlay');
+const melodicClose        = document.getElementById('melodic-close');
+const activeInstrumentEl  = document.getElementById('active-instrument-name');
+const melodicStatusEl     = document.getElementById('melodic-status');
+const rdMelodicVol        = document.getElementById('rd-melodic-vol');
+const melodicRefPlay      = document.getElementById('melodic-ref-play');
+const melodicRefVol       = document.getElementById('melodic-ref-vol');
+const melodicRefSelect    = document.getElementById('melodic-ref-select');
 
 // ── Help modal ─────────────────────────────
 btnHelp.addEventListener('click', () => modalOverlay.classList.add('open'));
@@ -210,10 +306,31 @@ percOverlay.addEventListener('click', e => {
   if (e.target === percOverlay) percOverlay.classList.remove('open');
 });
 
+// Melodic drawer
+btnMelodic.addEventListener('click', () => melodicOverlay.classList.add('open'));
+melodicClose.addEventListener('click', () => melodicOverlay.classList.remove('open'));
+melodicOverlay.addEventListener('click', e => {
+  if (e.target === melodicOverlay) melodicOverlay.classList.remove('open');
+});
+
+// Instrument button selection
+document.querySelectorAll('.melodic-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.melodic-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const inst = btn.dataset.instrument;
+    activeInstrumentEl.textContent = btn.textContent;
+    melodicRefPlay.textContent   = `${inst}(C4, 0.5)`;
+    melodicRefVol.textContent    = `inst_vol(${inst}, 0.8)`;
+    melodicRefSelect.textContent = `instrument(${inst})`;
+  });
+});
+
 // Escape key closes both drawers
 window.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     percOverlay.classList.remove('open');
+    melodicOverlay.classList.remove('open');
     modalOverlay.classList.remove('open');
   }
 });
@@ -270,6 +387,81 @@ function drawADSR() {
   adsrCtx.fill();
 }
 setTimeout(drawADSR, 100);
+
+function buildSynthInstrument(name, vol) {
+  const configs = {
+    organ: () => new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'square' },
+      envelope:   { attack: 0.01, decay: 0.01, sustain: 1.0, release: 0.2 },
+    }),
+    warmpad: () => new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'sine' },
+      envelope:   { attack: 0.8, decay: 0.4, sustain: 0.7, release: 2.0 },
+    }),
+    atmosphere: () => new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope:   { attack: 1.5, decay: 0.8, sustain: 0.8, release: 3.0 },
+    }),
+    clavicylinder: () => new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'sawtooth' },
+      envelope:   { attack: 0.001, decay: 0.4, sustain: 0.1, release: 0.8 },
+    }),
+  };
+
+  const synth = configs[name]();
+  synth.chain(vol, Tone.getDestination());
+  state.melodicSynths[name]  = synth;
+  state.melodicLoaded[name]  = true;
+  log(`// ${name} ready.`, 'ok');
+}
+
+async function loadInstrument(name) {
+  // Already loaded
+  if (state.melodicLoaded[name]) return state.melodicSynths[name];
+
+  // Update UI to loading state
+  const btn = document.querySelector(`.melodic-btn[data-instrument="${name}"]`);
+  if (btn) btn.classList.add('loading');
+  melodicStatusEl.innerHTML = '<span class="status-loading">⟳ Loading...</span>';
+  log(`// Loading ${name}...`, 'info');
+
+  const vol = new Tone.Volume(Tone.gainToDb(state.melodicVolumes[name]));
+
+  if (INSTRUMENT_TYPES[name] === 'synth') {
+    buildSynthInstrument(name, vol);
+  } else {
+    // Sampler
+    const cfg = SAMPLER_URLS[name];
+    await new Promise((resolve, reject) => {
+      const sampler = new Tone.Sampler({
+        urls:    cfg.urls,
+        baseUrl: cfg.baseUrl,
+        onload:  resolve,
+        onerror: (err) => {
+					log(`// Error loading ${name}: ${err}`, 'err');
+					reject(err);
+				},
+      }).chain(vol, Tone.getDestination());
+      state.melodicSynths[name] = sampler;
+    }).catch(err => {
+			log(`// Failed to load ${name} - check network or CORS.`);			
+			if (btn) { btn.classList.remove('loading'); btn.classList.add('loaded'); }
+			melodicStatusEl.innerHTML = '<span class="status-loaded" style="color:var(--accent2)">● Failed to load</span>';
+			return null;
+		});
+    state.melodicLoaded[name] = true;
+    log(`// ${name} samples loaded.`, 'ok');
+  }
+
+  // Update UI to loaded state
+  if (btn) {
+    btn.classList.remove('loading');
+    btn.classList.add('loaded');
+  }
+  melodicStatusEl.innerHTML = '<span class="status-loaded">● Loaded</span>';
+
+  return state.melodicSynths[name];
+}
 
 // ── Build perc step numbers ─────────────────────────
 function buildPercStepNumbers() {
@@ -477,14 +669,18 @@ Object.entries(percConfigs).forEach(([name, cfg]) => {
       envelope: { attack: 0.001, decay: cfg.decay, sustain: 0, release: 0.05 },
     });
   }
-
-  synth.chain(vol, Tone.getDestination());
-  state.percSynths[name] = { synth, vol, pitch: cfg.pitch || null, type: cfg.type };
+  synth.chain(vol, Tone.getDestination());                                                                                    
+  state.percSynths[name] = { synth, vol, pitch: cfg.pitch || null, type: cfg.type };  
 });
-
-  log('// Audio context started. Ready.', 'ok');
-  setStatus('● READY', 'ready');
-  startOscilloscope();
+// Pre-load synthesized melodic instruments
+const synthInstruments = ['organ', 'warmpad', 'atmosphere', 'clavicylinder'];
+synthInstruments.forEach(name => {
+  const vol = new Tone.Volume(Tone.gainToDb(state.melodicVolumes[name]));
+  buildSynthInstrument(name, vol);
+});
+log('// Audio context started. Ready.', 'ok');
+setStatus('● READY', 'ready');
+startOscilloscope();
 }  
 
 // ── Oscilloscope ───────────────────────────
@@ -527,10 +723,15 @@ function startDrumLoop() {
       const noteStep = Math.floor(STEPS / noteCount);
       state.melodyNotes.forEach((n, idx) => {
         if (step === idx * noteStep) {
-          state.melodySynth.triggerAttackRelease(n.note, n.dur, time);
-          Tone.getDraw().schedule(() => {
-            rdNote.textContent = n.note;
-            rdDur.textContent = `${n.dur}s`;
+          const activeSynth = state.melodicSynths[n.instrument || state.activeInstrument];
+					const fallback = state.melodySynth;
+					const synthToUse = (activeSynth && state.melodicLoaded[n.instrument || state.activeInstrument])
+						? activeSynth
+						: fallback;
+					synthToUse.triggerAttackRelease(n.note, n.dur, time);
+					Tone.getDraw().schedule(() => {
+						rdNote.textContent = n.note;
+						rdDur.textContent = `${n.dur}s`;
           }, time);
         }
       });
@@ -578,9 +779,8 @@ function applyEnvelope() {
   state.melodySynth.envelope.sustain = sustain;
   state.melodySynth.envelope.release = release;
 }
-
-// ── Command parser ─────────────────────────
-function executeCode(code) {
+// ── Code execution ─────────────────────────
+async function executeCode(code) {
   const commands = [];
   code.split('\n').forEach((raw, idx) => {
     const t = raw.trim();
@@ -590,7 +790,16 @@ function executeCode(code) {
   log(`// Executing ${commands.length} command(s)...`, 'info');
 
   const melodyNotes = [];
-
+// Pre-load any instrument() commands found before executing
+const preloadMatches = code.match(/^instrument\(\s*(\w+)\s*\)/gmi);
+if (preloadMatches) {
+  for (const match of preloadMatches) {
+    const nameMatch = match.match(/^instrument\(\s*(\w+)\s*\)/i);
+    if (nameMatch && INSTRUMENT_TYPES[nameMatch[1].toLowerCase()]) {
+      loadInstrument(nameMatch[1].toLowerCase());
+    }
+  }
+}
   commands.forEach(({ text: line, lineNum }) => {
     let m;
 
@@ -761,7 +970,53 @@ function executeCode(code) {
       if (state.percSynths[drum]) state.percSynths[drum].vol.volume.value = Tone.gainToDb(val);
       log(`// perc_vol(${drum}, ${val.toFixed(2)})`, 'ok'); return;
     }
-
+    // instrument(name) — set active instrument for play() routing         
+    const instMatch = line.match(/^instrument\(\s*(\w+)\s*\)$/i);
+    if (instMatch) {
+      const name = instMatch[1].toLowerCase();
+      if (!INSTRUMENT_TYPES[name]) { log(`// Line ${lineNum}: unknown instrument "${name}".`, 'err'); return; }
+      state.activeInstrument = name;      
+      const btn = document.querySelector(`.melodic-btn[data-instrument="${name}"]`);
+      if (btn) {
+        document.querySelectorAll('.melodic-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+      activeInstrumentEl.textContent = name;
+      log(`// instrument → ${name}`, 'ok');
+      loadInstrument(name);
+      return;
+    }
+    //inst_vol(name, value) — set instrument volume
+    const instVolMatch = line.match(/^inst_vol\(\s*(\w+)\s*,\s*([\d.]+)\s*\)$/i);
+    if (instVolMatch) {
+      const name = instVolMatch[1].toLowerCase();
+      const val  = parseFloat(instVolMatch[2]);
+      if (!INSTRUMENT_TYPES[name]) { log(`// Line ${lineNum}: unknown instrument "${name}".`, 'err'); return; }
+      if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: inst_vol must be 0.0–1.0.`, 'err'); return; }
+      state.melodicVolumes[name] = val;
+      if (state.melodicSynths[name]) {
+        const synth = state.melodicSynths[name];
+        if (synth.volume) synth.volume.value = Tone.gainToDb(val);
+      }
+      rdMelodicVol.textContent = val.toFixed(2);
+      log(`// inst_vol(${name}) → ${val.toFixed(2)}`, 'ok'); return;
+    }
+    // Individual instrument play commands
+    // e.g. piano(C4, 0.5), marimba(D3, 0.3)
+    const instrumentNames = Object.keys(INSTRUMENT_TYPES);      
+    for (const name of instrumentNames) {
+      const instPlayMatch = line.match(
+        new RegExp(`^${name}\\(\\s*([A-Ga-g][#b]?\\d)\\s*,\\s*([\\d.]+)\\s*\\)$`, 'i')
+      );
+      if (instPlayMatch) {
+        const note = instPlayMatch[1].charAt(0).toUpperCase() + instPlayMatch[1].slice(1);
+        const dur  = parseFloat(instPlayMatch[2]);
+        if (!VALID_NOTES.test(note)) { log(`// Line ${lineNum}: invalid note "${note}".`, 'err'); return; }
+        if (isNaN(dur) || dur <= 0 || dur > 8) { log(`// Line ${lineNum}: duration must be 0.1–8 s.`, 'err'); return; }
+        melodyNotes.push({ note, dur, instrument: name });
+        return;
+      }
+    }
     // Individual drum pattern commands
     // e.g. djembe([1,0,0,1,0,0,1,0])
     const drumNames = Object.keys(state.percPatterns);
@@ -804,14 +1059,28 @@ function parseDrum(raw, name, lineNum) {
 function playMelody(notes) {
   if (!state.melodySynth) return;
   let delay = 0;
-  notes.forEach(({ note, dur }) => {
-    setTimeout(() => {
+  notes.forEach(({ note, dur, instrument }) => {
+    setTimeout(async () => {
       state.isPlaying = true;
       setStatus('● PLAYING', 'active');
       rdNote.textContent = note;
       rdDur.textContent  = `${dur}s`;
-      log(`// play(${note}, ${dur})`, 'ok');
-      state.melodySynth.triggerAttackRelease(note, dur);
+
+      const targetInstrument = instrument || state.activeInstrument;
+      const activeSynth = state.melodicSynths[targetInstrument];
+
+      if (activeSynth && state.melodicLoaded[targetInstrument]) {
+        log(`// ${instrument ? instrument : 'play'}(${note}, ${dur})`, 'ok');
+        activeSynth.triggerAttackRelease(note, dur);
+      } else if (targetInstrument && INSTRUMENT_TYPES[targetInstrument]) {
+        log(`// Loading ${targetInstrument} then playing ${note}...`, 'info');
+        const synth = await loadInstrument(targetInstrument);
+        if (synth) synth.triggerAttackRelease(note, dur);
+      } else {
+        log(`// play(${note}, ${dur})`, 'ok');
+        state.melodySynth.triggerAttackRelease(note, dur);
+      }
+
       setTimeout(() => {
         state.isPlaying = false;
         if (!state.loopEnabled) setStatus('● READY', 'ready');

@@ -163,6 +163,90 @@
   </div>
  </div>
 
+<!-- ── MELODIC DRAWER ── -->
+<div class="drawer-overlay" id="melodic-overlay">
+  <div class="drawer" id="melodic-drawer">
+    <div class="drawer-header">
+      <span class="drawer-title">🎹 Melodic</span>
+      <button class="drawer-close" id="melodic-close">✕</button>
+    </div>
+
+    <!-- Instrument selector -->
+    <div class="drawer-section">
+      <span class="drawer-label">Select Instrument</span>
+      <div class="melodic-grid" id="melodic-grid">
+
+        <div class="melodic-category">
+          <span class="melodic-cat-label">Keys</span>
+          <div class="melodic-btn-group">
+            <button class="melodic-btn active" data-instrument="piano">Piano</button>
+            <button class="melodic-btn" data-instrument="electricpiano">E. Piano</button>
+            <button class="melodic-btn" data-instrument="organ">Organ</button>
+          </div>
+        </div>
+
+        <div class="melodic-category">
+          <span class="melodic-cat-label">Pads</span>
+          <div class="melodic-btn-group">
+            <button class="melodic-btn" data-instrument="warmpad">Warm Pad</button>
+            <button class="melodic-btn" data-instrument="atmosphere">Atmosphere</button>
+            <button class="melodic-btn" data-instrument="clavicylinder">Clavicylinder</button>
+          </div>
+        </div>
+
+        <div class="melodic-category">
+          <span class="melodic-cat-label">Strings & Bass</span>
+          <div class="melodic-btn-group">
+            <button class="melodic-btn" data-instrument="pluckedbass">Plucked Bass</button>
+            <button class="melodic-btn" data-instrument="electriccello">E. Cello</button>
+          </div>
+        </div>
+
+        <div class="melodic-category">
+          <span class="melodic-cat-label">World</span>
+          <div class="melodic-btn-group">
+           <button class="melodic-btn" data-instrument="violin">Violin</button>
+           <button class="melodic-btn" data-instrument="guitaracoustic">Guitar</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Active instrument display -->
+    <div class="drawer-section">
+      <span class="drawer-label">Active — <span class="drawer-value" id="active-instrument-name">Piano</span></span>
+      <div class="melodic-status" id="melodic-status">
+        <span class="status-loaded">● Loaded</span>
+      </div>
+      <div class="drawer-row" style="margin-top: 8px;">
+        <span class="drawer-sublabel">Volume</span>
+        <div class="readout-card" style="display:inline-block; padding: 4px 10px;">
+          <div class="rc-value green" id="rd-melodic-vol">0.80</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code reference -->
+    <div class="drawer-section">
+      <span class="drawer-label">Code Reference</span>
+      <div class="code-ref">
+        <div class="code-ref-line"><span class="ref-cmd" id="melodic-ref-play">piano(C4, 0.5)</span></div>
+        <div class="code-ref-line"><span class="ref-cmd" id="melodic-ref-vol">inst_vol(piano, 0.8)</span></div>
+        <div class="code-ref-line"><span class="ref-cmd" id="melodic-ref-select">instrument(piano)</span></div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="drawer-section">
+      <span class="drawer-label">How It Works</span>
+      <p class="drawer-info">Select an instrument above then use dedicated commands or set it as the active instrument for play() routing.</p>
+      <p class="drawer-info" style="margin-top: 6px;">Sampled instruments load on first use. A loading indicator appears while samples fetch.</p>
+    </div>
+
+  </div>
+</div> 
+
 <!-- ── HEADER ── -->
  <header>
    <div>
@@ -171,6 +255,7 @@
    </div>
    <div class="header-right">
      <button class="btn-percussion" id="btn-percussion">🥁 Percussion</button>
+     <button class="btn-melodic" id="btn-melodic">🎵 Melodic</button>
      <button class="btn-help" id="btn-help">? How to Use</button>
      <a href="../index.html" class="back-link">← Hub</a>
      <span id="status" class="status-pill ready">● READY</span>
