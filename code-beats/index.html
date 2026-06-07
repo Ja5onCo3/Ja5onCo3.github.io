@@ -92,11 +92,30 @@
   </table>
 </div>
 
-    <div class="modal-section">
-      <h3>Tips</h3>
-      <p>Commands execute top to bottom. Set synth, bpm, and envelope before play() for best results. The ↺ Loop button toggles the drum sequencer without re-running code. Stop clears all playback.</p>
-    </div>
-  </div>
+<div class="modal-section">
+  <h3>Exotic Percussion</h3>
+  <p>Program exotic drums from the 🥁 Percussion drawer. Each drum has an independent 8-step pattern running in sync with the main sequencer. Open the drawer to toggle cells or use code commands.</p>
+  <table class="cmd-table">
+    <tr><td>djembe([1,0,0,1,0,0,1,0])</td><td>8-step pattern for any exotic drum</td></tr>
+    <tr><td>tabla([1,0,1,0,0,0,0,0])</td><td>Same format for: tabla, darbuka, talking, dunun, cajon, conga, taiko, dhol, framedrum</td></tr>
+    <tr><td>perc_vol(djembe, 0.8)</td><td>Set volume for a specific drum (0.0–1.0)</td></tr>
+  </table>
+</div>
+
+<div class="modal-section">
+  <h3>Melodic Instruments</h3>
+  <p>Select and play real instruments from the 🎵 Melodic drawer. Sampled instruments load on first use. Use dedicated commands or route play() through a selected instrument.</p>
+  <table class="cmd-table">
+    <tr><td>piano(C4, 0.5)</td><td>Play a note with a specific instrument. Available: piano, electricpiano, organ, warmpad, atmosphere, clavicylinder, pluckedbass, electriccello, violin, guitaracoustic</td></tr>
+    <tr><td>instrument(piano)</td><td>Set active instrument — all play() commands route through it</td></tr>
+    <tr><td>inst_vol(piano, 0.8)</td><td>Set instrument volume (0.0–1.0)</td></tr>
+    <tr><td>melody_loop(true)</td><td>Loop play() notes in sync with drum sequencer (true | false)</td></tr>
+  </table>
+</div>
+
+<div class="modal-section">
+  <h3>Tips</h3>
+  <p>Commands execute top to bottom. Set synth, bpm, and envelope before play() for best results. The ↺ Loop button toggles the drum sequencer without re-running code. Stop clears all playback. Sampled instruments must finish loading before they play — a loading indicator appears in the Melodic drawer. Exotic percussion requires at least one drum pattern active and loop(true) to run.</p>
 </div>
 
 <!-- --PERCUSSION DRAWER -- -->
