@@ -150,7 +150,7 @@ play(A2, 0.5)
 play(F1, 0.5)
 play(G1, 0.5)
 melody_loop(true)
-loop(true)`,	
+loop(true)`	
 };
 
 // ── Constants ──────────────────────────────
