@@ -113,6 +113,44 @@ delay(0.5)
 play(C3, 3.0)
 play(G3, 3.0)
 play(E4, 3.0)`
+
+	PersPre:
+`// Personal Mod
+// Toggle mode — click grid cells to build your pattern
+bpm(120)
+volume(0.80)
+synth(sine)
+attack(0.05)
+bass_attack(0.5)
+decay(0.7)
+bass_decay(1.0)
+sustain(0.7)
+bass_sustain(0.4)
+release(0.03)
+bass_release(0.3)
+reverb(0.8)
+bass_reverb(1.0)
+kick([0,0,0,0,0,0,0,0])
+snare([0,0,0,0,0,0,0,0])
+hihat([0,0,0,0,0,0,0,0])
+bass([C1,0,Eb2,0,C1,0,G2,0])
+djembe([1,1,1,0,0,0,0,0])
+tabla([1,0,0,0,0,0,0,0])
+darbuka([1,0,1,0,1,0,0,0])
+dunun([0,1,0,0,1,0,0,0])
+conga([0,0,1,0,0,0,1,0])
+taiko([0,1,1,1,0,0,0,0])
+dhol([0,0,0,1,0,0,0,1])
+framedrum([0,0,0,0,1,1,0,1])
+instrument(electriccello)
+play(C2, 1.0)
+play(Eb2, 1.0)
+play(G2, 1.0)
+play(A2, 0.5)
+play(Fb1, 0.5)
+play(G1, 0.5)
+melody_loop(true)
+loop(true)`	
 };
 
 // ── Constants ──────────────────────────────
