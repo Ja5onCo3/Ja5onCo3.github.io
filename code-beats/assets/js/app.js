@@ -1084,7 +1084,7 @@ if (preloadMatches) {
   state.melodyNotes = melodyNotes;
   if (!state.melodyLoop && melodyNotes.length > 0) playMelody(melodyNotes);
   const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1));
-  if (state.loopEnabled && hasPattern) startDrumLoop();
+	if (state.loopEnabled && hasPattern) startDrumLoop();
 }
 
 function parseDrum(raw, name, lineNum) {
@@ -1136,7 +1136,8 @@ btnRun.addEventListener('click', async () => {
   // If editor is empty, check if any cells are toggled on
   if (!code.trim()) {
     const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1))
-                    || state.bassPattern.some(n => n !== '0');
+                    || state.bassPattern.some(n => n !== '0')
+										|| Object.values(state.percPatterns).some(p => p.some(v => v === 1));
     if (hasPattern) {
       const defaults =
 `// Toggle mode — click grid cells to build your pattern
@@ -1175,7 +1176,8 @@ btnLoop.addEventListener('click', async () => {
 
   if (state.loopEnabled) {
     const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1))
-                    || state.bassPattern.some(n => n !== '0');
+                    || state.bassPattern.some(n => n !== '0')
+										|| Object.values(state.percPatterns).some(p => p.some(v => v === 1));
     if (!cmEditor.getValue().trim() || !hasPattern) {
       const defaults =
 `// Toggle mode — click grid cells to build your pattern
