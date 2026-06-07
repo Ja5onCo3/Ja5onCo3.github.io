@@ -112,7 +112,7 @@ reverb(0.9)
 delay(0.5)
 play(C3, 3.0)
 play(G3, 3.0)
-play(E4, 3.0)`
+play(E4, 3.0)`,
 
 	PersPre:
 `// Personal Mod
@@ -147,10 +147,10 @@ play(C2, 1.0)
 play(Eb2, 1.0)
 play(G2, 1.0)
 play(A2, 0.5)
-play(Fb1, 0.5)
+play(F1, 0.5)
 play(G1, 0.5)
 melody_loop(true)
-loop(true)`	
+loop(true)`,	
 };
 
 // ── Constants ──────────────────────────────
