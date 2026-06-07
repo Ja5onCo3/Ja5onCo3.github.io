@@ -143,50 +143,80 @@ const state = {
   bassVol:      null,
   bassReverbFx: null,
   bassDelayFx:  null,
+
+  //Percussion
+  activeDrum:     'djembe',
+  percVolumes:    { djembe: 0.8, tabla: 0.8, darbuka: 0.8, talking: 0.8, dunun: 0.8, cajon: 0.8, conga: 0.8, taiko: 0.8, dhol: 0.8, framedrum: 0.8 },
+  percPatterns:   { djembe: new Array(STEPS).fill(0), tabla: new Array(STEPS).fill(0), darbuka: new Array(STEPS).fill(0), talking: new Array(STEPS).fill(0), dunun: new Array(STEPS).fill(0), cajon: new Array(STEPS).fill(0), conga: new Array(STEPS).fill(0), taiko: new Array(STEPS).fill(0), dhol: new Array(STEPS).fill(0), framedrum: new Array(STEPS).fill(0) },
+  percSynths:     {},
+
 };
 
 // ── DOM refs ───────────────────────────────
-const btnRun       = document.getElementById('btn-run');
-const btnStop      = document.getElementById('btn-stop');
-const btnLoop      = document.getElementById('btn-loop');
-const btnClear     = document.getElementById('btn-clear');
-const btnHelp      = document.getElementById('btn-help');
-const modalOverlay = document.getElementById('modal-overlay');
-const modalClose   = document.getElementById('modal-close');
-const statusEl     = document.getElementById('status');
-const rdWave       = document.getElementById('rd-wave');
-const rdBpm        = document.getElementById('rd-bpm');
-const rdVol        = document.getElementById('rd-vol');
-const rdNote       = document.getElementById('rd-note');
-const rdDur        = document.getElementById('rd-dur');
-const rdLoop       = document.getElementById('rd-loop');
-const rdAttack     = document.getElementById('rd-attack');
-const rdDecay      = document.getElementById('rd-decay');
-const rdSustain    = document.getElementById('rd-sustain');
-const rdRelease    = document.getElementById('rd-release');
-const rdReverb     = document.getElementById('rd-reverb');
-const rdDelay      = document.getElementById('rd-delay');
-const barReverb    = document.getElementById('bar-reverb');
-const barDelay     = document.getElementById('bar-delay');
-const consoleEl    = document.getElementById('console-log');
-const canvas       = document.getElementById('waveform-canvas');
-const ctx2d        = canvas.getContext('2d');
-const adsrCanvas   = document.getElementById('adsr-canvas');
-const adsrCtx      = adsrCanvas.getContext('2d');
-const rdBassWave   = document.getElementById('rd-bass-wave');
-const rdBassVol    = document.getElementById('rd-bass-vol');
-const rdBassReverb = document.getElementById('rd-bass-reverb');
-const rdBassSynth  = document.getElementById('rd-bass-synth');
-const rdBassAttack = document.getElementById('rd-bass-attack');
-const rdBassDecay  = document.getElementById('rd-bass-decay');
-const rdBassSustain= document.getElementById('rd-bass-sustain');
-const rdBassRelease= document.getElementById('rd-bass-release');
-const rdBassDelay  = document.getElementById('rd-bass-delay');
+const btnRun          = document.getElementById('btn-run');
+const btnStop         = document.getElementById('btn-stop');
+const btnLoop         = document.getElementById('btn-loop');
+const btnClear        = document.getElementById('btn-clear');
+const btnHelp         = document.getElementById('btn-help');
+const modalOverlay    = document.getElementById('modal-overlay');
+const modalClose      = document.getElementById('modal-close');
+const statusEl        = document.getElementById('status');
+const rdWave          = document.getElementById('rd-wave');
+const rdBpm           = document.getElementById('rd-bpm');
+const rdVol           = document.getElementById('rd-vol');
+const rdNote          = document.getElementById('rd-note');
+const rdDur           = document.getElementById('rd-dur');
+const rdLoop          = document.getElementById('rd-loop');
+const rdAttack        = document.getElementById('rd-attack');
+const rdDecay         = document.getElementById('rd-decay');
+const rdSustain       = document.getElementById('rd-sustain');
+const rdRelease       = document.getElementById('rd-release');
+const rdReverb        = document.getElementById('rd-reverb');
+const rdDelay         = document.getElementById('rd-delay');
+const barReverb       = document.getElementById('bar-reverb');
+const barDelay        = document.getElementById('bar-delay');
+const consoleEl       = document.getElementById('console-log');
+const canvas          = document.getElementById('waveform-canvas');
+const ctx2d           = canvas.getContext('2d');
+const adsrCanvas      = document.getElementById('adsr-canvas');
+const adsrCtx         = adsrCanvas.getContext('2d');
+const rdBassWave      = document.getElementById('rd-bass-wave');
+const rdBassVol       = document.getElementById('rd-bass-vol');
+const rdBassReverb    = document.getElementById('rd-bass-reverb');
+const rdBassSynth     = document.getElementById('rd-bass-synth');
+const rdBassAttack    = document.getElementById('rd-bass-attack');
+const rdBassDecay     = document.getElementById('rd-bass-decay');
+const rdBassSustain   = document.getElementById('rd-bass-sustain');
+const rdBassRelease   = document.getElementById('rd-bass-release');
+const rdBassDelay     = document.getElementById('rd-bass-delay');
+const btnPercussion   = document.getElementById('btn-percussion');
+const percOverlay     = document.getElementById('percussion-overlay');
+const percClose       = document.getElementById('percussion-close');
+const activeDrumEl    = document.getElementById('active-drum');
+const rdPercVol       = document.getElementById('rd-drum-vol');
+const percSeqGrid     = document.getElementById('perc-seq-grid');
+const percStepNumbers = document.getElementById('perc-step-numbers');
+const activePatternEl = document.getElementById('active-patterns');
 
 // ── Help modal ─────────────────────────────
 btnHelp.addEventListener('click', () => modalOverlay.classList.add('open'));
 modalClose.addEventListener('click', () => modalOverlay.classList.remove('open'));
 modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) modalOverlay.classList.remove('open'); });
+
+// Percussion drawer
+btnPercussion.addEventListener('click', () => percOverlay.classList.add('open'));
+percClose.addEventListener('click', () => percOverlay.classList.remove('open'));
+percOverlay.addEventListener('click', e => {
+  if (e.target === percOverlay) percOverlay.classList.remove('open');
+});
+
+// Escape key closes both drawers
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    percOverlay.classList.remove('open');
+    modalOverlay.classList.remove('open');
+  }
+});
 
 // ── Console ────────────────────────────────
 function log(msg, type = 'info') {
@@ -240,6 +270,74 @@ function drawADSR() {
   adsrCtx.fill();
 }
 setTimeout(drawADSR, 100);
+
+// ── Build perc step numbers ─────────────────────────
+function buildPercStepNumbers() {
+  percStepNumbers.innerHTML = '';
+  for (let i = 1; i <= STEPS; i++) {
+    const d = document.createElement('div');
+    d.className = 'perc-step-num';
+    d.textContent = i;
+    percStepNumbers.appendChild(d);
+  }
+}
+buildPercStepNumbers();
+
+// ── Build perc sequencer grid ─────────────────────────
+function buildPercGrid() {
+  percSeqGrid.innerHTML = '';
+  const pattern = state.percPatterns[state.activeDrum];
+  pattern.forEach((on, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'perc-cell' + (on ? ' on' : '');
+    cell.addEventListener('click', () => {
+      state.percPatterns[state.activeDrum][i] ^= 1;
+      cell.classList.toggle('on', state.percPatterns[state.activeDrum][i] === 1);
+      updateActivePatterns();
+    });
+    percSeqGrid.appendChild(cell);
+  });
+}
+buildPercGrid();
+
+// ── Update active patterns display ───────────────────
+
+function updateActivePatterns() {
+  const active = Object.entries(state.percPatterns)
+    .filter(([, pattern]) => pattern.some(v => v === 1))
+    .map(([name, pattern]) => ({ name, pattern }));
+
+  if (active.length === 0) {
+    activePatternEl.innerHTML = '<span class="no-patterns">// No patterns set</span>';
+    return;
+  }
+
+  activePatternEl.innerHTML = active.map(({ name, pattern }) =>
+    `<div class="pattern-line">${name}([${pattern.join(',')}])</div>`
+  ).join('');
+
+}
+
+function updateCodeRef() {
+  const drum = state.activeDrum;
+  const refLines = document.querySelectorAll('.ref-cmd');
+  if (refLines[0]) refLines[0].textContent = `${drum}([1,0,0,1,0,0,1,0])`;
+  if (refLines[1]) refLines[1].textContent = `perc_vol(${drum}, 0.8)`;
+}
+
+// ── Drum button selection ────────────────────
+
+document.querySelectorAll('.perc-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.perc-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.activeDrum = btn.dataset.drum;
+    activeDrumEl.textContent = btn.textContent;
+    rdPercVol.textContent = state.percVolumes[state.activeDrum].toFixed(2);
+    buildPercGrid();
+    updateCodeRef();
+  });
+});
 
 // ── Step numbers & drum grids ──────────────
 function buildStepNumbers() {
@@ -338,11 +436,56 @@ async function initAudio() {
     envelope:   { ...state.bassAdsr },
   }).chain(state.bassDelayFx, state.bassReverbFx, state.bassVol, Tone.getDestination());
 
+// ── Percussion synths — distinct per instrument ──
+const percConfigs = {
+  djembe:    { type: 'membrane', pitch: 'C2',  pitchDecay: 0.08, octaves: 6,  decay: 0.4  },
+  tabla:     { type: 'metal',    pitch: 'G3',  decay: 0.08, harmonicity: 3.5, modulationIndex: 16, resonance: 3200, octaves: 1.2 },
+  darbuka:   { type: 'membrane', pitch: 'G2',  pitchDecay: 0.04, octaves: 4,  decay: 0.15 },
+  talking:   { type: 'membrane', pitch: 'A2',  pitchDecay: 0.18, octaves: 9,  decay: 0.25 },
+  dunun:     { type: 'membrane', pitch: 'A1',  pitchDecay: 0.15, octaves: 10, decay: 0.6  },
+  cajon:     { type: 'noise',    color: 'pink', decay: 0.18 },
+  conga:     { type: 'membrane', pitch: 'E2',  pitchDecay: 0.05, octaves: 4,  decay: 0.2  },
+  taiko:     { type: 'membrane', pitch: 'C1',  pitchDecay: 0.2,  octaves: 12, decay: 0.8  },
+  dhol:      { type: 'membrane', pitch: 'D1',  pitchDecay: 0.1,  octaves: 7,  decay: 0.35 },
+  framedrum: { type: 'metal',    pitch: 'A3',  decay: 0.12, harmonicity: 2.1, modulationIndex: 8,  resonance: 2800, octaves: 0.8 },
+};
+
+Object.entries(percConfigs).forEach(([name, cfg]) => {
+  const vol = new Tone.Volume(Tone.gainToDb(state.percVolumes[name]));
+  let synth;
+
+  if (cfg.type === 'membrane') {
+    synth = new Tone.MembraneSynth({
+      pitchDecay: cfg.pitchDecay,
+      octaves:    cfg.octaves,
+      envelope:   { attack: 0.001, decay: cfg.decay, sustain: 0, release: 0.1 },
+    });
+
+  } else if (cfg.type === 'metal') {
+    synth = new Tone.MetalSynth({
+      frequency:       cfg.pitch ? Tone.Frequency(cfg.pitch).toFrequency() : 400,
+      harmonicity:     cfg.harmonicity,
+      modulationIndex: cfg.modulationIndex,
+      resonance:       cfg.resonance,
+      octaves:         cfg.octaves,
+      envelope:        { attack: 0.001, decay: cfg.decay, release: 0.01 },
+    });
+
+  } else if (cfg.type === 'noise') {
+    synth = new Tone.NoiseSynth({
+      noise:    { type: cfg.color || 'brown' },
+      envelope: { attack: 0.001, decay: cfg.decay, sustain: 0, release: 0.05 },
+    });
+  }
+
+  synth.chain(vol, Tone.getDestination());
+  state.percSynths[name] = { synth, vol, pitch: cfg.pitch || null, type: cfg.type };
+});
 
   log('// Audio context started. Ready.', 'ok');
   setStatus('● READY', 'ready');
   startOscilloscope();
-}
+}  
 
 // ── Oscilloscope ───────────────────────────
 function resizeCanvas() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
@@ -392,6 +535,7 @@ function startDrumLoop() {
         }
       });
     }
+
     if (state.bassPattern.some(n => n !== '0')) {
       const bassNote = state.bassPattern[step];
       if (bassNote !== '0') {
@@ -401,6 +545,15 @@ function startDrumLoop() {
         }, time);
       }
     }
+    //---Exotic percussion ------
+    Object.entries(state.percPatterns).forEach(([name, pattern]) => {
+      if (pattern[step] && state.percSynths[name]) {
+        const { synth, pitch } = state.percSynths[name];
+        synth.triggerAttackRelease(pitch, '8n', time);
+        state.isPlaying = true;
+      }
+    });
+
     step = (step + 1) % STEPS;
   }, [...Array(STEPS).keys()], '8n');
   state.seqLoop.start(0);
@@ -595,6 +748,34 @@ function executeCode(code) {
       state.bassPattern = raw;
       buildDrumGrid('bass');
       log(`// bass → [${raw.join(',')}]`, 'ok'); return;
+    }
+
+    // perc_vol(drum, value)
+    const percVolMatch = line.match(/^perc_vol\(\s*(\w+)\s*,\s*([\d.]+)\s*\)$/i);
+    if (percVolMatch) {
+      const drum = percVolMatch[1].toLowerCase();
+      const val = parseFloat(percVolMatch[2]);
+      if (!state.percPatterns[drum]) { log(`// Line ${lineNum}: unknown percussion "${drum}".`, 'err'); return; }
+      if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: percussion volume must be 0.0–1.0.`, 'err'); return; }
+      state.percVolumes[drum] = val;
+      if (state.percSynths[drum]) state.percSynths[drum].vol.volume.value = Tone.gainToDb(val);
+      log(`// perc_vol(${drum}, ${val.toFixed(2)})`, 'ok'); return;
+    }
+
+    // Individual drum pattern commands
+    // e.g. djembe([1,0,0,1,0,0,1,0])
+    const drumNames = Object.keys(state.percPatterns);
+    for (const drum of drumNames) {
+      const percPatMatch = line.match(new RegExp(`^${drum}\\(\\s*\\[([0-9,\\s]+)\\]\\s*\\)$`, 'i'));
+      if (percPatMatch) {
+        const parsed = parseDrum(percPatMatch[1], drum, lineNum);
+        if (parsed) {
+          state.percPatterns[drum] = parsed;
+          if (state.activeDrum === drum) buildPercGrid();
+          log(`// ${drum} → [${parsed.join(',')}]`, 'ok');
+        }
+        return;
+      }
     }
 
     const kickM  = line.match(/^kick\(\s*\[([0-9,\s]+)\]\s*\)$/i);

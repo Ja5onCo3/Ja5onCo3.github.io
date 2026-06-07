@@ -99,66 +99,131 @@
   </div>
 </div>
 
+<!-- --PERCUSSION DRAWER -- -->
+ <div class="drawer-overlay" id="percussion-overlay">
+  <div class="drawer" id="percussion-drawer">
+    <div class="drawer-header">
+      <span class="drawer-title">🥁 Percussion</span>
+      <button class="drawer-close" id="percussion-close">✕</button>
+    </div>
+
+    <!-- Instrument selector grid -->
+     <div class="drawer-section">
+       <span class="drawer-label">Select Drum</span>
+       <div class="percussion-grid" id="percussion-grid">
+         <button class="perc-btn active" data-drum="djembe">Djembe</button>
+         <button class="perc-btn" data-drum="tabla">Tabla</button>
+         <button class="perc-btn" data-drum="darbuka">Darbuka</button>
+         <button class="perc-btn" data-drum="talking">Talking Drum</button>
+         <button class="perc-btn" data-drum="dunun">Dunun</button>
+         <button class="perc-btn" data-drum="cajon">Cajón</button>
+         <button class="perc-btn" data-drum="conga">Conga</button>
+         <button class="perc-btn" data-drum="taiko">Taiko</button>
+         <button class="perc-btn" data-drum="dhol">Dhol</button>
+         <button class="perc-btn" data-drum="framedrum">Frame Drum</button>
+       </div>
+     </div>
+
+    <!-- Active Drum Display -->
+     <div class="drawer-section">
+       <span class="drawer-label">Active - <span class="drawer-value" id="active-drum">Djembe</span></span>
+       <div class="drawer-row">
+         <span class="drawer-sublabel">Volume</span>
+         <div class="readout-card" style="display:inline-block; padding: 4px 10px;">
+           <div class="rc-value green" id="rd-drum-vol">0.80</div>
+        </div>
+      </div>
+     </div>
+
+
+      <!-- Mini Sequencer -->
+       <div class="drawer-section">
+        <span class="drawer-label">Step Sequencer</span>
+        <div class="perc-step-bar" id="perc-step-numbers"></div>
+        <div class="perc-seq-grid" id="perc-seq-grid"></div>
+       </div>
+
+      <!-- Active Pattern Display -->
+        <div class="drawer-section">
+          <span class="drawer-label">Active Patterns</span>
+          <div class="active-patterns" id="active-patterns">
+            <span class="no-patterns">// No patterns set</span>
+          </div>
+        </div>
+
+      <!-- Code reference -->
+       <div class="drawer-section">
+        <span class="drawer-label">Code Reference</span>
+        <div class="code-ref">
+          <div class="code-ref-line"><span class="ref-cmd">djembe([1,0,0,1,0,0,1,0])</span></div>
+          <div class="code-ref-line"><span class="ref-cmd">djembe_vol(0.8)</span></div>
+        </div>
+       </div>  
+
+  </div>
+ </div>
+
 <!-- ── HEADER ── -->
-<header>
-  <div>
-    <div class="logo">CODE<span>BEATS</span></div>
-    <div class="tagline">Syntax-to-Synth Lab</div>
-  </div>
-  <div class="header-right">
-    <button class="btn-help" id="btn-help">? How to Use</button>
-    <a href="../index.html" class="back-link">← Hub</a>
-    <span id="status" class="status-pill ready">● READY</span>
-  </div>
-</header>
+ <header>
+   <div>
+     <div class="logo">CODE<span>BEATS</span></div>
+     <div class="tagline">Syntax-to-Synth Lab</div>
+   </div>
+   <div class="header-right">
+     <button class="btn-percussion" id="btn-percussion">🥁 Percussion</button>
+     <button class="btn-help" id="btn-help">? How to Use</button>
+     <a href="../index.html" class="back-link">← Hub</a>
+     <span id="status" class="status-pill ready">● READY</span>
+   </div>
+ </header>
 
 <div class="workspace">
 
   <!-- LEFT: CODE EDITOR -->
-  <div class="panel" id="code-pane">
-    <div class="panel-header">
-      <span class="dot"></span>
-      Code Input
-    </div>
-    <div id="cm-wrapper"></div>
-    <div class="code-toolbar">
-      <button class="btn btn-run"  id="btn-run">▶ Run</button>
-      <button class="btn btn-stop" id="btn-stop">■ Stop</button>
-      <button class="btn btn-loop" id="btn-loop">↺ Loop</button>
-      <button class="btn btn-clear" id="btn-clear">Clear</button>
-    </div>
-    <div class="preset-bar">
-      <span>Presets:</span>
-      <button class="btn-preset" data-preset="basic">Basic</button>
-      <button class="btn-preset" data-preset="dreamy">Dreamy</button>
-      <button class="btn-preset" data-preset="punchy">Punchy</button>
-      <button class="btn-preset" data-preset="groove">Groove</button>
-      <button class="btn-preset" data-preset="hiphop">Hip-Hop</button>
-      <button class="btn-preset" data-preset="ambient">Ambient</button>
-    </div>
-  </div>
+   <div class="panel" id="code-pane">
+     <div class="panel-header">
+       <span class="dot"></span>
+       Code Input
+     </div>
+     <div id="cm-wrapper"></div>
+     <div class="code-toolbar">
+       <button class="btn btn-run"  id="btn-run">▶ Run</button>
+       <button class="btn btn-stop" id="btn-stop">■ Stop</button>
+       <button class="btn btn-loop" id="btn-loop">↺ Loop</button>
+       <button class="btn btn-clear" id="btn-clear">Clear</button>
+     </div>
+     <div class="preset-bar">
+       <span>Presets:</span>
+       <button class="btn-preset" data-preset="basic">Basic</button>
+       <button class="btn-preset" data-preset="dreamy">Dreamy</button>
+       <button class="btn-preset" data-preset="punchy">Punchy</button>
+       <button class="btn-preset" data-preset="groove">Groove</button>
+       <button class="btn-preset" data-preset="hiphop">Hip-Hop</button>
+       <button class="btn-preset" data-preset="ambient">Ambient</button>
+     </div>
+   </div>
 
   <!-- RIGHT: SYNTH UI -->
-  <div class="panel" id="synth-pane">
-    <div class="panel-header">
-      <span class="dot pink"></span>
-      Synth Output
-    </div>
-    <div class="synth-body">
+   <div class="panel" id="synth-pane">
+     <div class="panel-header">
+       <span class="dot pink"></span>
+       Synth Output
+     </div>
+     <div class="synth-body">
 
-      <div>
-        <span class="section-label">Oscilloscope</span>
-        <canvas id="waveform-canvas"></canvas>
-      </div>
+       <div>
+         <span class="section-label">Oscilloscope</span>
+         <canvas id="waveform-canvas"></canvas>
+       </div>
 
-      <div class="readout-grid">
-        <div class="readout-card"><div class="rc-label">Waveform</div><div class="rc-value" id="rd-wave">SINE</div></div>
-        <div class="readout-card"><div class="rc-label">BPM</div><div class="rc-value yellow" id="rd-bpm">120</div></div>
-        <div class="readout-card"><div class="rc-label">Volume</div><div class="rc-value green" id="rd-vol">0.80</div></div>
-        <div class="readout-card"><div class="rc-label">Last Note</div><div class="rc-value pink" id="rd-note">—</div></div>
-        <div class="readout-card"><div class="rc-label">Duration</div><div class="rc-value" id="rd-dur">—</div></div>
-        <div class="readout-card"><div class="rc-label">Loop</div><div class="rc-value" id="rd-loop">OFF</div></div>
-      </div>
+       <div class="readout-grid">
+         <div class="readout-card"><div class="rc-label">Waveform</div><div class="rc-value" id="rd-wave">SINE</div></div>
+         <div class="readout-card"><div class="rc-label">BPM</div><div class="rc-value yellow" id="rd-bpm">120</div></div>
+         <div class="readout-card"><div class="rc-label">Volume</div><div class="rc-value green" id="rd-vol">0.80</div></div>
+         <div class="readout-card"><div class="rc-label">Last Note</div><div class="rc-value pink" id="rd-note">—</div></div>
+         <div class="readout-card"><div class="rc-label">Duration</div><div class="rc-value" id="rd-dur">—</div></div>
+         <div class="readout-card"><div class="rc-label">Loop</div><div class="rc-value" id="rd-loop">OFF</div></div>
+       </div>
 
       <div>
         <span class="section-label">Envelope (ADSR)</span>
