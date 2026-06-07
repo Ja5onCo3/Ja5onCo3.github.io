@@ -33,6 +33,7 @@
       --kick-color:  #ff3cac;
       --snare-color: #ffe600;
       --hihat-color: #00ffe7;
+      --bass-color:  #bf5fff; 
       --font-mono:   'Share Tech Mono', monospace;
       --font-head:   'Orbitron', sans-serif;
       --radius:      6px;
@@ -429,6 +430,7 @@
     .drum-label.kick  { color: var(--kick-color); }
     .drum-label.snare { color: var(--snare-color); }
     .drum-label.hihat { color: var(--hihat-color); }
+    .drum-label.bass  { color: var(--bass-color); }
     .drum-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
     .drum-cell {
       aspect-ratio: 1;
@@ -441,6 +443,7 @@
     .drum-row.kick-row  .drum-cell.on { background: var(--kick-color);  box-shadow: 0 0 7px var(--kick-color);  border-color: var(--kick-color); }
     .drum-row.snare-row .drum-cell.on { background: var(--snare-color); box-shadow: 0 0 7px var(--snare-color); border-color: var(--snare-color); }
     .drum-row.hihat-row .drum-cell.on { background: var(--hihat-color); box-shadow: 0 0 7px var(--hihat-color); border-color: var(--hihat-color); }
+    .drum-row.bass-row  .drum-cell.on { background: var(--bass-color);  box-shadow: 0 0 7px var(--bass-color);  border-color: var(--bass-color); }
     .drum-cell.active { outline: 2px solid var(--accent3); outline-offset: 1px; }
     .drum-cell.on.active { filter: brightness(1.6); }
 
@@ -512,6 +515,7 @@
         <tr><td>synth(sine)</td><td>Set waveform: sine | square | triangle | sawtooth</td></tr>
         <tr><td>bpm(120)</td><td>Set tempo in beats per minute (40–240)</td></tr>
         <tr><td>volume(0.8)</td><td>Master volume (0.0–1.0)</td></tr>
+        <tr><td>melody_loop(true)</td><td>Loop play() notes in sync with drum sequencer (true | false)</td></tr>
       </table>
     </div>
 
@@ -544,6 +548,22 @@
         <tr><td>loop(true)</td><td>Start looping (true | false)</td></tr>
       </table>
     </div>
+
+    <div class="modal-section">
+  <h3>Bass Line</h3>
+  <p>Program an independent bass synth with its own waveform, envelope, and effects. Bass runs in sync with the drum sequencer — loop(true) must be active.</p>
+  <table class="cmd-table">
+    <tr><td>bass([C2,0,G1,0,C2,0,Bb1,0])</td><td>8-step bass pattern. Use note names or 0 for rest</td></tr>
+    <tr><td>bass_synth(sawtooth)</td><td>Bass waveform: sine | square | triangle | sawtooth</td></tr>
+    <tr><td>bass_vol(0.7)</td><td>Bass volume (0.0–1.0)</td></tr>
+    <tr><td>bass_attack(0.05)</td><td>Bass attack (0.001–2.0 s)</td></tr>
+    <tr><td>bass_decay(0.2)</td><td>Bass decay (0.001–2.0 s)</td></tr>
+    <tr><td>bass_sustain(0.6)</td><td>Bass sustain level (0.0–1.0)</td></tr>
+    <tr><td>bass_release(0.4)</td><td>Bass release (0.001–4.0 s)</td></tr>
+    <tr><td>bass_reverb(0.2)</td><td>Bass reverb wet mix (0.0–1.0)</td></tr>
+    <tr><td>bass_delay(0.1)</td><td>Bass delay wet mix (0.0–1.0)</td></tr>
+  </table>
+</div>
 
     <div class="modal-section">
       <h3>Tips</h3>
@@ -645,7 +665,12 @@
         <div class="readout-grid" style="grid-template-columns: repeat(3,1fr);">
           <div class="readout-card"><div class="rc-label">Bass Wave</div><div class="rc-value" id="rd-bass-wave">SINE</div></div>
           <div class="readout-card"><div class="rc-label">Bass Vol</div><div class="rc-value green" id="rd-bass-vol">0.70</div></div>
+          <div class="readout-card"><div class="rc-label">Bass Attack</div><div class="rc-value" id="rd-bass-attack">0.050</div></div>
+          <div class="readout-card"><div class="rc-label">Bass Decay</div><div class="rc-value yellow" id="rd-bass-decay">0.200</div></div>
+          <div class="readout-card"><div class="rc-label">Bass Sustain</div><div class="rc-value green" id="rd-bass-sustain">0.60</div></div>
+          <div class="readout-card"><div class="rc-label">Bass Release</div><div class="rc-value pink" id="rd-bass-release">0.400</div></div>
           <div class="readout-card"><div class="rc-label">Bass Reverb</div><div class="rc-value purple" id="rd-bass-reverb">0.00</div></div>
+          <div class="readout-card"><div class="rc-label">Bass Delay</div><div class="rc-value orange" id="rd-bass-delay">0.00</div></div>
         </div>
       </div>
 
@@ -696,6 +721,12 @@ const cmEditor = CodeMirror(document.getElementById('cm-wrapper'), {
     'Ctrl-Enter': () => document.getElementById('btn-run').click(),
   }
 });
+
+cmEditor.on('change', (instance, changeObj) => {
+  if (changeObj.origin !== 'setValue') {
+    state.toggleMode = false;
+  }
+})
 
 // ── Presets ────────────────────────────────
 const PRESETS = {
@@ -798,7 +829,7 @@ const state = {
   kickSynth: null, snareSynth: null, hihatSynth: null,
   vol: null, analyser: null, reverbFx: null, delayFx: null, seqLoop: null,
   waveType: 'sine', bpm: 120, volume: 0.8,
-  loopEnabled: false, isPlaying: false, currentStep: -1,
+  loopEnabled: false, isPlaying: false, currentStep: -1, toggleMode: false,
   adsr: { attack: 0.02, decay: 0.1, sustain: 0.5, release: 0.8 },
   fx:   { reverb: 0.0, delay: 0.0 },
   patterns: {
@@ -807,7 +838,7 @@ const state = {
     hihat: new Array(STEPS).fill(0),
   },
   bassWaveType: 'sine',
-  bassVolume:   0.7,
+  bassVolume:   0.85,
   bassPattern:  ['0','0','0','0','0','0','0','0'],
   bassAdsr: { attack: 0.05, decay: 0.2, sustain: 0.6, release: 0.4 },
   bassFx:   { reverb: 0.0, delay: 0.0 },
@@ -818,33 +849,42 @@ const state = {
 };
 
 // ── DOM refs ───────────────────────────────
-const btnRun    = document.getElementById('btn-run');
-const btnStop   = document.getElementById('btn-stop');
-const btnLoop   = document.getElementById('btn-loop');
-const btnClear  = document.getElementById('btn-clear');
-const btnHelp   = document.getElementById('btn-help');
+const btnRun       = document.getElementById('btn-run');
+const btnStop      = document.getElementById('btn-stop');
+const btnLoop      = document.getElementById('btn-loop');
+const btnClear     = document.getElementById('btn-clear');
+const btnHelp      = document.getElementById('btn-help');
 const modalOverlay = document.getElementById('modal-overlay');
 const modalClose   = document.getElementById('modal-close');
-const statusEl  = document.getElementById('status');
-const rdWave    = document.getElementById('rd-wave');
-const rdBpm     = document.getElementById('rd-bpm');
-const rdVol     = document.getElementById('rd-vol');
-const rdNote    = document.getElementById('rd-note');
-const rdDur     = document.getElementById('rd-dur');
-const rdLoop    = document.getElementById('rd-loop');
-const rdAttack  = document.getElementById('rd-attack');
-const rdDecay   = document.getElementById('rd-decay');
-const rdSustain = document.getElementById('rd-sustain');
-const rdRelease = document.getElementById('rd-release');
-const rdReverb  = document.getElementById('rd-reverb');
-const rdDelay   = document.getElementById('rd-delay');
-const barReverb = document.getElementById('bar-reverb');
-const barDelay  = document.getElementById('bar-delay');
-const consoleEl = document.getElementById('console-log');
-const canvas    = document.getElementById('waveform-canvas');
-const ctx2d     = canvas.getContext('2d');
-const adsrCanvas = document.getElementById('adsr-canvas');
-const adsrCtx    = adsrCanvas.getContext('2d');
+const statusEl     = document.getElementById('status');
+const rdWave       = document.getElementById('rd-wave');
+const rdBpm        = document.getElementById('rd-bpm');
+const rdVol        = document.getElementById('rd-vol');
+const rdNote       = document.getElementById('rd-note');
+const rdDur        = document.getElementById('rd-dur');
+const rdLoop       = document.getElementById('rd-loop');
+const rdAttack     = document.getElementById('rd-attack');
+const rdDecay      = document.getElementById('rd-decay');
+const rdSustain    = document.getElementById('rd-sustain');
+const rdRelease    = document.getElementById('rd-release');
+const rdReverb     = document.getElementById('rd-reverb');
+const rdDelay      = document.getElementById('rd-delay');
+const barReverb    = document.getElementById('bar-reverb');
+const barDelay     = document.getElementById('bar-delay');
+const consoleEl    = document.getElementById('console-log');
+const canvas       = document.getElementById('waveform-canvas');
+const ctx2d        = canvas.getContext('2d');
+const adsrCanvas   = document.getElementById('adsr-canvas');
+const adsrCtx      = adsrCanvas.getContext('2d');
+const rdBassWave   = document.getElementById('rd-bass-wave');
+const rdBassVol    = document.getElementById('rd-bass-vol');
+const rdBassReverb = document.getElementById('rd-bass-reverb');
+const rdBassSynth  = document.getElementById('rd-bass-synth');
+const rdBassAttack = document.getElementById('rd-bass-attack');
+const rdBassDecay  = document.getElementById('rd-bass-decay');
+const rdBassSustain= document.getElementById('rd-bass-sustain');
+const rdBassRelease= document.getElementById('rd-bass-release');
+const rdBassDelay  = document.getElementById('rd-bass-delay');
 
 // ── Help modal ─────────────────────────────
 btnHelp.addEventListener('click', () => modalOverlay.classList.add('open'));
@@ -902,7 +942,7 @@ function drawADSR() {
   adsrCtx.fillStyle = grad;
   adsrCtx.fill();
 }
-drawADSR();
+setTimeout(drawADSR, 100);
 
 // ── Step numbers & drum grids ──────────────
 function buildStepNumbers() {
@@ -920,21 +960,52 @@ buildStepNumbers();
 function buildDrumGrid(instrument) {
   const grid = document.getElementById(`grid-${instrument}`);
   grid.innerHTML = '';
-  state.patterns[instrument].forEach((on, i) => {
+  const pattern = instrument === 'bass' ? state.bassPattern : state.patterns[instrument];
+  pattern.forEach((val, i) => {
     const cell = document.createElement('div');
-    cell.className = 'drum-cell' + (on ? ' on' : '');
+    const isOn = instrument === 'bass' ? val !== '0' : val === 1;
+    cell.className = 'drum-cell' + (isOn ? ' on' : '');
     cell.addEventListener('click', () => {
-      state.patterns[instrument][i] ^= 1;
-      cell.classList.toggle('on', state.patterns[instrument][i] === 1);
+      if (instrument === 'bass') {
+        state.bassPattern[i] = state.bassPattern[i] !== '0' ? '0' : 'C2';
+      } else {
+        state.patterns[instrument][i] ^= 1;
+      }
+      cell.classList.toggle('on', instrument === 'bass'
+        ? state.bassPattern[i] !== '0'
+        : state.patterns[instrument][i] === 1);
+      state.toggleMode = true;  
+      syncEditorFromGrid();  
     });
     grid.appendChild(cell);
   });
 }
-function buildAllGrids() { ['kick','snare','hihat'].forEach(buildDrumGrid); }
+
+function syncEditorFromGrid() {
+  if (!state.toggleMode) return;
+  const kick  = state.patterns.kick.join(',');
+  const snare = state.patterns.snare.join(',');
+  const hihat = state.patterns.hihat.join(',');
+  const bass  = state.bassPattern.join(',');
+
+  const code =
+`// Toggle mode — click grid cells to build your pattern
+bpm(${state.bpm})
+volume(${state.volume.toFixed(2)})
+kick([${kick}])
+snare([${snare}])
+hihat([${hihat}])
+bass([${bass}])
+loop(true)`;
+
+  cmEditor.setValue(code);
+}
+
+function buildAllGrids() { ['kick','snare','hihat','bass'].forEach(buildDrumGrid); }
 buildAllGrids();
 
 function highlightStep(step) {
-  ['kick','snare','hihat'].forEach(inst => {
+  ['kick','snare','hihat','bass'].forEach(inst => {
     document.querySelectorAll(`#grid-${inst} .drum-cell`).forEach((c, i) => {
       c.classList.toggle('active', i === step);
     });
@@ -1155,6 +1226,13 @@ function executeCode(code) {
       if (!VALID_WAVES.includes(wave)) { log(`// Line ${lineNum}: unknown waveform "${wave}".`, 'err'); return; }
       state.bassWaveType = wave;
       if (state.bassSynth) state.bassSynth.oscillator.type = wave;
+      if (state.bassVol) {
+        const compensation = { sine: 6, triangle: 4, square: 0, sawtooth: 0 };
+        const boost = compensation[wave] ?? 0;
+        state.bassVol.volume.value = Tone.gainToDb(state.bassVolume) + boost;
+      }
+
+      rdBassWave.textContent = wave.toUpperCase();
       log(`// bass_synth → ${wave}`, 'ok'); return;
     }
     if ((m = line.match(/^bass_vol\(\s*([\d.]+)\s*\)$/i))) {
@@ -1162,6 +1240,7 @@ function executeCode(code) {
       if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: bass_vol must be 0.0–1.0.`, 'err'); return; }
       state.bassVolume = val;
       if (state.bassVol) state.bassVol.volume.value = Tone.gainToDb(val);
+      rdBassVol.textContent = val.toFixed(2);
       log(`// bass_vol → ${val.toFixed(2)}`, 'ok'); return;
     }
     if ((m = line.match(/^bass_attack\(\s*([\d.]+)\s*\)$/i))) {
@@ -1169,6 +1248,7 @@ function executeCode(code) {
       if (isNaN(val) || val < 0.001 || val > 2) { log(`// Line ${lineNum}: bass attack must be 0.001–2.0 s.`, 'err'); return; }
       state.bassAdsr.attack = val;
       if (state.bassSynth) state.bassSynth.envelope.attack = val;
+      rdBassAttack.textContent = val.toFixed(3);
       log(`// bass_attack → ${val.toFixed(3)}`, 'ok'); return;
     }
     if ((m = line.match(/^bass_decay\(\s*([\d.]+)\s*\)$/i))) {
@@ -1176,6 +1256,7 @@ function executeCode(code) {
       if (isNaN(val) || val < 0.001 || val > 2) { log(`// Line ${lineNum}: bass decay must be 0.001–2.0 s.`, 'err'); return; }
       state.bassAdsr.decay = val;
       if (state.bassSynth) state.bassSynth.envelope.decay = val;
+      rdBassDecay.textContent = val.toFixed(3);
       log(`// bass_decay → ${val.toFixed(3)}`, 'ok'); return;
     }
     if ((m = line.match(/^bass_sustain\(\s*([\d.]+)\s*\)$/i))) {
@@ -1183,6 +1264,7 @@ function executeCode(code) {
       if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: bass sustain must be 0.0–1.0.`, 'err'); return; }
       state.bassAdsr.sustain = val;
       if (state.bassSynth) state.bassSynth.envelope.sustain = val;
+      rdBassSustain.textContent = val.toFixed(2);
       log(`// bass_sustain → ${val.toFixed(2)}`, 'ok'); return;
     }
     if ((m = line.match(/^bass_release\(\s*([\d.]+)\s*\)$/i))) {
@@ -1190,6 +1272,7 @@ function executeCode(code) {
       if (isNaN(val) || val < 0.001 || val > 4) { log(`// Line ${lineNum}: bass release must be 0.001–2.0 s.`, 'err'); return; }
       state.bassAdsr.release = val;
       if (state.bassSynth) state.bassSynth.envelope.release = val;
+      rdBassRelease.textContent = val.toFixed(3);
       log(`// bass_release → ${val.toFixed(3)}`, 'ok'); return;
     }
     if ((m = line.match(/^bass_reverb\(\s*([\d.]+)\s*\)$/i))) {
@@ -1197,6 +1280,7 @@ function executeCode(code) {
       if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: bass reverb must be 0.0–1.0.`, 'err'); return; }
       state.bassFx.reverb = val;
       if (state.bassReverbFx) state.bassReverbFx.wet.value = val;
+      rdBassReverb.textContent = val.toFixed(2);
       log(`// bass_reverb → ${val.toFixed(2)}`, 'ok'); return;
     }
     if ((m = line.match(/^bass_delay\(\s*([\d.]+)\s*\)$/i))) {
@@ -1204,6 +1288,7 @@ function executeCode(code) {
       if (isNaN(val) || val < 0 || val > 1) { log(`// Line ${lineNum}: bass delay must be 0.0–1.0.`, 'err'); return; }
       state.bassFx.delay = val;
       if (state.bassDelayFx) state.bassDelayFx.wet.value = val;
+      rdBassDelay.textContent = val.toFixed(2);
       log(`// bass_delay → ${val.toFixed(2)}`, 'ok'); return;
     }
     const bassPatM = line.match(/^bass\(\s*\[([^\]]+)\]\s*\)$/i);
@@ -1211,6 +1296,7 @@ function executeCode(code) {
       const raw = bassPatM[1].split(',').map(n => n.trim());
       if (raw.length !== STEPS) { log(`// Line ${lineNum}: bass pattern needs exactly ${STEPS} values. Got ${raw.length}.`, 'err'); return; }
       state.bassPattern = raw;
+      buildDrumGrid('bass');
       log(`// bass → [${raw.join(',')}]`, 'ok'); return;
     }
 
@@ -1261,7 +1347,27 @@ function playMelody(notes) {
 btnRun.addEventListener('click', async () => {
   await initAudio();
   const code = cmEditor.getValue();
-  if (!code.trim()) { log('// Editor is empty.', 'err'); return; }
+  
+  // If editor is empty, check if any cells are toggled on
+  if (!code.trim()) {
+    const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1))
+                    || state.bassPattern.some(n => n !== '0');
+    if (hasPattern) {
+      const defaults =
+`// Toggle mode — click grid cells to build your pattern
+bpm(120)
+volume(0.8)
+loop(true)`;
+      cmEditor.setValue(defaults);
+      state.toggleMode = true;
+      stopDrumLoop();
+      executeCode(cmEditor.getValue());
+    } else {
+      log('// Editor is empty. Type commands or toggle sequencer cells.', 'err');
+    }
+    return;
+  }
+
   stopDrumLoop();
   executeCode(code);
 });
@@ -1281,9 +1387,23 @@ btnLoop.addEventListener('click', async () => {
   state.loopEnabled = !state.loopEnabled;
   btnLoop.classList.toggle('active', state.loopEnabled);
   rdLoop.textContent = state.loopEnabled ? 'ON' : 'OFF';
-  const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1));
-  if (state.loopEnabled && hasPattern) {
-    startDrumLoop();
+
+  if (state.loopEnabled) {
+    const hasPattern = Object.values(state.patterns).some(p => p.some(v => v === 1))
+                    || state.bassPattern.some(n => n !== '0');
+    if (!cmEditor.getValue().trim() || !hasPattern) {
+      const defaults =
+`// Toggle mode — click grid cells to build your pattern
+bpm(120)
+volume(0.8)
+loop(true)`;
+      cmEditor.setValue(defaults);
+      state.toggleMode = true;
+      stopDrumLoop();
+      executeCode(cmEditor.getValue());
+    } else {
+      startDrumLoop();
+    }
   } else {
     stopDrumLoop();
     setStatus('● READY', 'ready');
