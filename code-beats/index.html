@@ -118,6 +118,9 @@
   <p>Commands execute top to bottom. Set synth, bpm, and envelope before play() for best results. The ↺ Loop button toggles the drum sequencer without re-running code. Stop clears all playback. Sampled instruments must finish loading before they play — a loading indicator appears in the Melodic drawer. Exotic percussion requires at least one drum pattern active and loop(true) to run.</p>
 </div>
 
+  </div><!-- /.modal -->
+</div><!-- /.modal-overlay -->
+
 <!-- --PERCUSSION DRAWER -- -->
  <div class="drawer-overlay" id="percussion-overlay">
   <div class="drawer" id="percussion-drawer">
@@ -366,6 +369,7 @@
           <div class="readout-card"><div class="rc-label">Bass Decay</div><div class="rc-value yellow" id="rd-bass-decay">0.200</div></div>
           <div class="readout-card"><div class="rc-label">Bass Sustain</div><div class="rc-value green" id="rd-bass-sustain">0.60</div></div>
           <div class="readout-card"><div class="rc-label">Bass Release</div><div class="rc-value pink" id="rd-bass-release">0.400</div></div>
+          <div class="readout-card"><div class="rc-label">Bass Synth</div><div class="rc-value" id="rd-bass-synth">SINE</div></div>
           <div class="readout-card"><div class="rc-label">Bass Reverb</div><div class="rc-value purple" id="rd-bass-reverb">0.00</div></div>
           <div class="readout-card"><div class="rc-label">Bass Delay</div><div class="rc-value orange" id="rd-bass-delay">0.00</div></div>
         </div>
