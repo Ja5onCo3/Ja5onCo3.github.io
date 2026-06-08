@@ -5,6 +5,7 @@
    ════════════════════════════════════════════ */
 
 // ── CodeMirror init ────────────────────────
+
 const cmEditor = CodeMirror(document.getElementById('cm-wrapper'), {
   value: '',
   mode: 'javascript',
@@ -18,12 +19,6 @@ const cmEditor = CodeMirror(document.getElementById('cm-wrapper'), {
     'Ctrl-Enter': () => document.getElementById('btn-run').click(),
   }
 });
-
-cmEditor.on('change', (instance, changeObj) => {
-  if (changeObj.origin !== 'setValue') {
-    state.toggleMode = false;
-  }
-})
 
 // ── Presets ────────────────────────────────
 const PRESETS = {
@@ -275,6 +270,12 @@ melodicSynths:       {},
 melodicLoaded:       {},
 
 };
+
+cmEditor.on('change', (instance, changeObj) => {
+  if (changeObj.origin !== 'setValue') {
+    state.toggleMode = false;
+  }
+});
 
 
 // ── DOM refs ───────────────────────────────
